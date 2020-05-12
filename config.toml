@@ -40,5 +40,5 @@ theme = "hugo-sustain"
   name = "resume"
   identifier = "resume"
   weight = 300
-  url = "Oldham_Mika_resume.pdf"
+  url = "/Oldham_Mika_resume.pdf"
   

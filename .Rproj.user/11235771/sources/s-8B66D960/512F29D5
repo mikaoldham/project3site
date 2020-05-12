@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589301743881.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "813477472",
+    "id" : "512F29D5",
+    "lastKnownWriteTime" : 1589301817,
+    "last_content_update" : 1589301817516,
+    "path" : "~/Website_mio289/content/project2final.Rmd",
+    "project_path" : "content/project2final.Rmd",
+    "properties" : {
+        "cursorPosition" : "337,4",
+        "last_setup_crc32" : "A63A374C420e7fcd",
+        "scrollLine" : "339"
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

@@ -1,0 +1,550 @@
+---
+title: 'Project 1: Exploratory Data Analysis of Netflix and Fitbit Statistics During 2019'
+author: "Mikayla Oldham - mio289"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>The following data was gathered and combined from two difference sources: my personal Fitbit data from the Fitbit website and my personal Netflix viewing history from the Netflix website. Once joined by date, these data sets contained information such as Netflix titles watched, calories burned, active minutes, sedentary minutes, number of steps, and more. It was interesting to explore data that was based on my own life experiences, as I often wonder how much time I spend doing certain things or if I demonstrate different life patterns. I was mainly expecting to find relations between Netflix viewing data and activity statistics that represented a negative correlation, showing that the more I watch Netflix, the less I am active. Ulimately, the results would hopeful encourage a switch from Netflix viewing to better activity habits!</p>
+</div>
+<div id="gathering-and-combining-data" class="section level2">
+<h2>Gathering and Combining Data</h2>
+<p><strong>The first data set obtained was my personal Fitbit data. It consists of measurements for steps, distance travelled, minutes of different levels of activity, calories burned, and more active measurements for each day. Each data set was read in by month from the Fitbit website, then combined to form a singular Fitbit data set.</strong></p>
+<pre class="r"><code>jan_fit &lt;- read.csv(&quot;january2019_fitbit2.csv&quot; )
+feb_fit &lt;- read.csv(&quot;February2019_fitbit.csv&quot;)
+mar_fit &lt;- read.csv(&quot;March2019_fitbit.csv&quot;)
+apr_fit &lt;- read.csv(&quot;April_fitbit.csv&quot;)
+may_fit &lt;- read.csv(&quot;May2019_fitbit.csv&quot;)
+june_fit &lt;- read.csv(&quot;June2019_fitbit.csv&quot;)
+july_fit &lt;- read.csv(&quot;July2019_fitbit.csv&quot;)
+aug_fit &lt;- read.csv(&quot;August2019_fitbit.csv&quot;)
+sep_fit &lt;- read.csv(&quot;September2019_fitbit.csv&quot;)
+oct_fit &lt;- read.csv(&quot;October2019_fitbit.csv&quot;)
+nov_fit &lt;- read.csv(&quot;November2019_fitbit.csv&quot;)
+dec_fit &lt;- read.csv(&quot;December2019_fitbit.csv&quot;)
+
+fitbit_bind &lt;- rbind(jan_fit, feb_fit, mar_fit, apr_fit, may_fit, june_fit, july_fit, aug_fit, sep_fit, oct_fit, nov_fit, dec_fit )  </code></pre>
+<p><strong>The next data set was obtained from my personal Netflix viewing data. This data contains the title of each episode watched each day. These data sets were sliced down so we are only looking at the values for days in 2019.</strong></p>
+<pre class="r"><code>netflix &lt;- read.csv(&quot;NetflixViewingHistory.csv&quot;)
+library(tidyverse)
+netflix_cut &lt;- netflix %&gt;% slice(158:741)</code></pre>
+<p><strong>The Netfix data set and the Fitbit data set were joined by “date” to create a single data set showing variables from both individual data sets. Before the joining could occur, the “date” variable in original data sets had to be reformatted to match each other. The fitbit data was more straightforward based on the original “date” format, as only the symbols had to be removed.</strong></p>
+<pre class="r"><code>fitbit_fixed &lt;- fitbit_bind %&gt;% separate(Date, into=c(NA, &quot;mmdd&quot;), sep=5)  %&gt;% 
+  mutate(mmdd = gsub(&quot;-&quot;, &quot;&quot;, mmdd)) %&gt;% select(-Floors)
+glimpse(fitbit_fixed)</code></pre>
+<pre><code>## Rows: 365
+## Columns: 9
+## $ mmdd                   &lt;chr&gt; &quot;0101&quot;, &quot;0102&quot;, &quot;0103&quot;, &quot;0104&quot;, &quot;0105&quot;, &quot;0106&quot;…
+## $ Calories.Burned        &lt;chr&gt; &quot;1,913&quot;, &quot;1,567&quot;, &quot;1,393&quot;, &quot;1,705&quot;, &quot;1,393&quot;, &quot;…
+## $ Steps                  &lt;chr&gt; &quot;5,817&quot;, &quot;3,109&quot;, &quot;0&quot;, &quot;2,210&quot;, &quot;0&quot;, &quot;4,612&quot;, …
+## $ Distance               &lt;dbl&gt; 2.49, 1.42, 0.00, 0.95, 0.00, 1.98, 0.00, 4.66…
+## $ Minutes.Sedentary      &lt;chr&gt; &quot;1,221&quot;, &quot;1,396&quot;, &quot;1,440&quot;, &quot;1,320&quot;, &quot;1,440&quot;, &quot;…
+## $ Minutes.Lightly.Active &lt;int&gt; 219, 26, 0, 120, 0, 176, 0, 255, 388, 160, 273…
+## $ Minutes.Fairly.Active  &lt;int&gt; 0, 5, 0, 0, 0, 9, 0, 37, 64, 0, 4, 52, 15, 11,…
+## $ Minutes.Very.Active    &lt;int&gt; 0, 13, 0, 0, 0, 0, 0, 0, 9, 0, 3, 3, 0, 0, 0, …
+## $ Activity.Calories      &lt;chr&gt; &quot;692&quot;, &quot;206&quot;, &quot;0&quot;, &quot;399&quot;, &quot;0&quot;, &quot;625&quot;, &quot;0&quot;, &quot;1,…</code></pre>
+<p><strong>The Netflix data took more reconfiguration based on how the “date” was originally formatted. The order of the numbers had to be rearranged, the symbols had to be removed, and zeros had to be added prior to numbers with only 1 digit. This last step required the oberservations to be sliced based on how many digits in the month and day so that the zero was placed in the correct spot. This step also included the addition of a new variable in the Netflix data frame that counted the number of times Netflix was viewed per day.</strong></p>
+<pre class="r"><code>netflix_6 &lt;- netflix_cut %&gt;% slice(1:45, 48:101, 107:218) %&gt;%
+  mutate(mmdd=gsub(&quot;/&quot;, &quot;&quot;, Date)) %&gt;% separate(mmdd, into=c(&quot;mmdd&quot;, NA), sep=4) %&gt;% select(-Date)
+
+netflix_5_OND &lt;- netflix_cut %&gt;% slice(46:47, 102:106, 219:250) %&gt;% 
+  mutate(mmdd=gsub(&quot;/&quot;, &quot;0&quot;, Date)) %&gt;% separate(mmdd, into=c(&quot;mmdd&quot;, NA), sep=4) %&gt;% select(-Date)
+
+netflix_5 &lt;- netflix_cut %&gt;% slice(251:359, 371:416, 432:466, 483:487, 490:493, 515:562) %&gt;% 
+  mutate(mmdd=gsub(&quot;/&quot;, &quot;&quot;, Date)) %&gt;% separate(mmdd, into=c(&quot;mmdd&quot;, NA), sep=3) %&gt;% 
+  mutate(mmdd=paste0(&quot;0&quot;,mmdd)) %&gt;% select(-Date)
+
+netflix_4 &lt;- netflix_cut %&gt;% slice(360:370, 417:431, 467:482, 488:489, 494:514, 563:584) %&gt;% 
+  mutate(mmdd=gsub(&quot;/&quot;, &quot;&quot;, Date)) %&gt;% separate(mmdd, into=c(&quot;mmdd&quot;, NA), sep=2) %&gt;% 
+  mutate(mmdd=paste0(&quot;0&quot;,mmdd)) %&gt;% separate(mmdd, into=c(&quot;mm&quot;, &quot;dd&quot;), sep=2) %&gt;%
+  mutate(dd=paste0(&quot;0&quot;,dd)) %&gt;% unite(mm, dd, col=&quot;mmdd&quot;, sep=&quot;&quot;) %&gt;% select(-Date)
+
+netflix_fixed_intm &lt;- rbind(netflix_6, netflix_5, netflix_4, netflix_5_OND) %&gt;%
+  arrange(mmdd)
+
+netflix_fixed1 &lt;- netflix_fixed_intm %&gt;%
+  group_by(mmdd) %&gt;%
+  mutate(Time.Watched.Netflix = n_distinct(mmdd)) %&gt;%
+  summarise_if(is.numeric, sum) 
+
+netflix_fixed &lt;- full_join(netflix_fixed_intm, netflix_fixed1, by=&quot;mmdd&quot;)
+
+glimpse(netflix_fixed)</code></pre>
+<pre><code>## Rows: 584
+## Columns: 3
+## $ Title                &lt;chr&gt; &quot;Grey&#39;s Anatomy: Season 11: Got to Be Real&quot;, &quot;Gr…
+## $ mmdd                 &lt;chr&gt; &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, …
+## $ Time.Watched.Netflix &lt;int&gt; 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 2, 2, 3,…</code></pre>
+<p><strong>The data was then joined using “full join”. This type of function was used because we wanted to keep all observations, regardless of whether Netflix was watched that day or not. This meant that because each date was represented by Fitbit data, any observation that lacked Netflix data recieved an “NA” in the place of the Title. The lack of Netflix viewing on certain days is valuable information that was kept to be used later for further analysis.</strong></p>
+<pre class="r"><code>full &lt;- full_join(fitbit_fixed, netflix_fixed, by=&quot;mmdd&quot;) %&gt;%
+  mutate(Time.Watched.Netflix = replace_na(Time.Watched.Netflix, 0)) %&gt;%
+  mutate(Activity.Calories = replace_na(Activity.Calories, 0))
+
+glimpse(full)</code></pre>
+<pre><code>## Rows: 809
+## Columns: 11
+## $ mmdd                   &lt;chr&gt; &quot;0101&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;…
+## $ Calories.Burned        &lt;chr&gt; &quot;1,913&quot;, &quot;1,567&quot;, &quot;1,567&quot;, &quot;1,567&quot;, &quot;1,567&quot;, &quot;…
+## $ Steps                  &lt;chr&gt; &quot;5,817&quot;, &quot;3,109&quot;, &quot;3,109&quot;, &quot;3,109&quot;, &quot;3,109&quot;, &quot;…
+## $ Distance               &lt;dbl&gt; 2.49, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42…
+## $ Minutes.Sedentary      &lt;chr&gt; &quot;1,221&quot;, &quot;1,396&quot;, &quot;1,396&quot;, &quot;1,396&quot;, &quot;1,396&quot;, &quot;…
+## $ Minutes.Lightly.Active &lt;int&gt; 219, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 0…
+## $ Minutes.Fairly.Active  &lt;int&gt; 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0…
+## $ Minutes.Very.Active    &lt;int&gt; 0, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 0, …
+## $ Activity.Calories      &lt;chr&gt; &quot;692&quot;, &quot;206&quot;, &quot;206&quot;, &quot;206&quot;, &quot;206&quot;, &quot;206&quot;, &quot;206…
+## $ Title                  &lt;chr&gt; NA, &quot;Grey&#39;s Anatomy: Season 11: Got to Be Real…
+## $ Time.Watched.Netflix   &lt;dbl&gt; 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 2, …</code></pre>
+</div>
+<div id="tidying-the-data" class="section level2">
+<h2>Tidying the Data</h2>
+<p><strong>The original format of the data set is “wide”, as there are multiple columns for the 3 different levels of activity: Lightly, Fairly, and Very. This data can be made “long” by creating a new variable for the level of activity and a separate variable for the minutes of each activity. The format of some variables were also changed in this step to be “character” or “numeric” for later analysis purposes.</strong></p>
+<pre class="r"><code>full_longer &lt;- full %&gt;% pivot_longer(6:8, names_to=&quot;Level.of.Activity&quot;, values_to=&quot;Minutes.of.Activity&quot;) %&gt;%
+  separate(Level.of.Activity, into=c(NA, &quot;Level.of.Activity&quot;)) %&gt;%
+  select(mmdd, Title, Time.Watched.Netflix, Minutes.Sedentary, Level.of.Activity,
+         Minutes.of.Activity,Calories.Burned, Activity.Calories,everything())
+
+full_longer &lt;- full_longer %&gt;% mutate_at(c(4,7:9),function(x)as.character(x)) %&gt;% 
+  mutate_at(c(4,7:9),function(x)gsub(&quot;,&quot;,&quot;&quot;,x)) %&gt;% 
+  mutate_at(c(4,7:9),function(x)as.numeric(x))
+
+glimpse(full_longer)</code></pre>
+<pre><code>## Rows: 2,427
+## Columns: 10
+## $ mmdd                 &lt;chr&gt; &quot;0101&quot;, &quot;0101&quot;, &quot;0101&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, …
+## $ Title                &lt;chr&gt; NA, NA, NA, &quot;Grey&#39;s Anatomy: Season 11: Got to B…
+## $ Time.Watched.Netflix &lt;dbl&gt; 0, 0, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,…
+## $ Minutes.Sedentary    &lt;dbl&gt; 1221, 1221, 1221, 1396, 1396, 1396, 1396, 1396, …
+## $ Level.of.Activity    &lt;chr&gt; &quot;Lightly&quot;, &quot;Fairly&quot;, &quot;Very&quot;, &quot;Lightly&quot;, &quot;Fairly&quot;…
+## $ Minutes.of.Activity  &lt;int&gt; 219, 0, 0, 26, 5, 13, 26, 5, 13, 26, 5, 13, 26, …
+## $ Calories.Burned      &lt;dbl&gt; 1913, 1913, 1913, 1567, 1567, 1567, 1567, 1567, …
+## $ Activity.Calories    &lt;dbl&gt; 692, 692, 692, 206, 206, 206, 206, 206, 206, 206…
+## $ Steps                &lt;dbl&gt; 5817, 5817, 5817, 3109, 3109, 3109, 3109, 3109, …
+## $ Distance             &lt;dbl&gt; 2.49, 2.49, 2.49, 1.42, 1.42, 1.42, 1.42, 1.42, …</code></pre>
+<p><strong>The “long” data can then be transformed back to its original format to represent “wide” data. This new data frame best represents the data in a tidy way, so it is the one used for most of the future analysis.</strong></p>
+<pre class="r"><code>full_wider &lt;- full_longer %&gt;% pivot_wider(names_from=&quot;Level.of.Activity&quot;, values_from=&quot;Minutes.of.Activity&quot;) %&gt;%
+  rename(&quot;Minutes.Fairly.Active&quot;=Fairly, &quot;Minutes.Lightly.Active&quot;=Lightly, &quot;Minutes.Very.Active&quot;=Very) %&gt;%
+  select(mmdd, Title, Time.Watched.Netflix, Minutes.Sedentary, Minutes.Lightly.Active,
+         Minutes.Fairly.Active, Minutes.Very.Active, Calories.Burned, Activity.Calories, everything())
+
+full_wider &lt;- full_wider %&gt;% mutate_at(c(4,8:10),function(x)as.character(x)) %&gt;% 
+  mutate_at(c(4,8:10),function(x)gsub(&quot;,&quot;,&quot;&quot;,x)) %&gt;% 
+  mutate_at(c(4,8:10),function(x)as.numeric(x))
+
+glimpse(full_wider)</code></pre>
+<pre><code>## Rows: 809
+## Columns: 11
+## $ mmdd                   &lt;chr&gt; &quot;0101&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;…
+## $ Title                  &lt;chr&gt; NA, &quot;Grey&#39;s Anatomy: Season 11: Got to Be Real…
+## $ Time.Watched.Netflix   &lt;dbl&gt; 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 2, …
+## $ Minutes.Sedentary      &lt;dbl&gt; 1221, 1396, 1396, 1396, 1396, 1396, 1396, 1396…
+## $ Minutes.Lightly.Active &lt;int&gt; 219, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 0…
+## $ Minutes.Fairly.Active  &lt;int&gt; 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0…
+## $ Minutes.Very.Active    &lt;int&gt; 0, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 0, …
+## $ Calories.Burned        &lt;dbl&gt; 1913, 1567, 1567, 1567, 1567, 1567, 1567, 1567…
+## $ Activity.Calories      &lt;dbl&gt; 692, 206, 206, 206, 206, 206, 206, 206, 206, 2…
+## $ Steps                  &lt;dbl&gt; 5817, 3109, 3109, 3109, 3109, 3109, 3109, 3109…
+## $ Distance               &lt;dbl&gt; 2.49, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42…</code></pre>
+</div>
+<div id="data-analysis-the-data-set-was-manipulated-and-summarized-in-various-ways-to-explore-different-interesting-aspects." class="section level2">
+<h2>Data Analysis: The data set was manipulated and summarized in various ways to explore different interesting aspects.</h2>
+<p><strong>1. First, the numeric variables from the raw data were summarized based on the means, standard deviations, minimum values, and maximum values.</strong></p>
+<pre class="r"><code>summary_stats1 &lt;- full_wider %&gt;% select_if(is.numeric)
+
+raw_mean &lt;- summary_stats1  %&gt;% summarise_all(mean) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 1
+## Columns: 9
+## $ Time.Watched.Netflix   &lt;dbl&gt; 4.833127
+## $ Minutes.Sedentary      &lt;dbl&gt; 1240.044
+## $ Minutes.Lightly.Active &lt;dbl&gt; 102.4833
+## $ Minutes.Fairly.Active  &lt;dbl&gt; 11.79604
+## $ Minutes.Very.Active    &lt;dbl&gt; 11.50185
+## $ Calories.Burned        &lt;dbl&gt; 1759.129
+## $ Activity.Calories      &lt;dbl&gt; 464.7515
+## $ Steps                  &lt;dbl&gt; 5730.739
+## $ Distance               &lt;dbl&gt; 2.515822</code></pre>
+<p><em>When considering the Netflix data, I averaged almost 5 episodes a day. Looking at the types of activity, I averaged the most light activity at about 102 minutes a day, then fairly active and very active both at about 12 minutes a day each. Though I walked around 10,000 to 20,000 steps on some days, my average steps per day came in only at about 5,700 because of the days that I did not wear my fitbit and effectively walked zero steps.</em></p>
+<pre class="r"><code>raw_sd &lt;- summary_stats1 %&gt;% summarise_all(sd) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 1
+## Columns: 9
+## $ Time.Watched.Netflix   &lt;dbl&gt; 4.58399
+## $ Minutes.Sedentary      &lt;dbl&gt; 231.737
+## $ Minutes.Lightly.Active &lt;dbl&gt; 94.20893
+## $ Minutes.Fairly.Active  &lt;dbl&gt; 14.18414
+## $ Minutes.Very.Active    &lt;dbl&gt; 14.87815
+## $ Calories.Burned        &lt;dbl&gt; 315.781
+## $ Activity.Calories      &lt;dbl&gt; 405.4122
+## $ Steps                  &lt;dbl&gt; 4775.204
+## $ Distance               &lt;dbl&gt; 2.104754</code></pre>
+<pre class="r"><code>raw_min &lt;- summary_stats1 %&gt;% summarise_all(min) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 1
+## Columns: 9
+## $ Time.Watched.Netflix   &lt;dbl&gt; 0
+## $ Minutes.Sedentary      &lt;dbl&gt; 479
+## $ Minutes.Lightly.Active &lt;int&gt; 0
+## $ Minutes.Fairly.Active  &lt;int&gt; 0
+## $ Minutes.Very.Active    &lt;int&gt; 0
+## $ Calories.Burned        &lt;dbl&gt; 1350
+## $ Activity.Calories      &lt;dbl&gt; 0
+## $ Steps                  &lt;dbl&gt; 0
+## $ Distance               &lt;dbl&gt; 0</code></pre>
+<p><em>Many variables have “0” as their minimum value, which is due to days of not wearing my fitbit or watching netflix. The minimum value of 1350 calories burned corresponds to what should theoretically be my basal metabolic rate, as this would be the number of calories burnt at rest without any additional activity.</em></p>
+<pre class="r"><code>raw_max &lt;- summary_stats1 %&gt;% summarise_all(max) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 1
+## Columns: 9
+## $ Time.Watched.Netflix   &lt;dbl&gt; 17
+## $ Minutes.Sedentary      &lt;dbl&gt; 1440
+## $ Minutes.Lightly.Active &lt;int&gt; 411
+## $ Minutes.Fairly.Active  &lt;int&gt; 74
+## $ Minutes.Very.Active    &lt;int&gt; 72
+## $ Calories.Burned        &lt;dbl&gt; 2763
+## $ Activity.Calories      &lt;dbl&gt; 1764
+## $ Steps                  &lt;dbl&gt; 22901
+## $ Distance               &lt;dbl&gt; 9.82</code></pre>
+<p><strong>2. While still looking at the raw data, the total number of steps taken in 2019 was found by creating a new variable that finds the cumulative sum of steps as time went on.</strong></p>
+<pre class="r"><code>cumu.steps &lt;- full_wider %&gt;% arrange(mmdd) %&gt;% select(-Title) %&gt;% distinct() %&gt;%
+  mutate(Cumu.Steps=cumsum(Steps))
+total_steps &lt;- cumu.steps %&gt;% select(Cumu.Steps) %&gt;% summarise(max(Cumu.Steps))
+total_steps</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `max(Cumu.Steps)`
+##               &lt;dbl&gt;
+## 1           2214779</code></pre>
+<p><em>I took a total of 2,214,779 steps in 2019!</em></p>
+<p><strong>The same was done for distance, where a new variable was created that finds the cumulative distance I travelled in 2019.</strong></p>
+<pre class="r"><code>cumu.distance &lt;- full_wider %&gt;% arrange(mmdd) %&gt;% select(-Title) %&gt;% distinct() %&gt;%
+  mutate(Cumu.Distance=cumsum(Distance))
+total_distance &lt;- cumu.distance %&gt;% select(Cumu.Distance) %&gt;% 
+  summarise(max(Cumu.Distance))
+total_distance</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `max(Cumu.Distance)`
+##                  &lt;dbl&gt;
+## 1                 973.</code></pre>
+<p><em>I walked a total of 973 miles in 2019, which is about 3.5x the entire length of the Grand Canyon!</em></p>
+<p><strong>3. How many steps do I take in a mile on average? I was interested to see how consistent my steps per mile were, so a new variable was created for each day that calculated this by dividing steps by distance. </strong></p>
+<pre class="r"><code>steps_per_mile &lt;- full_wider %&gt;% group_by(mmdd) %&gt;% mutate(Steps.Per.Mile = Steps/Distance) %&gt;%
+  na.omit(Steps.Per.Mile)
+
+steps_per_mile %&gt;% ungroup() %&gt;% filter(Distance&gt;0) %&gt;% summarize(mean(Steps.Per.Mile))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean(Steps.Per.Mile)`
+##                    &lt;dbl&gt;
+## 1                  2291.</code></pre>
+<p><em>It was found that on average, I walk about 2,291 steps in a mile.</em></p>
+<p><strong>I then wanted to see how much my steps per mile differed between observations. This was done by calculating the mean absolute variation.</strong></p>
+<pre class="r"><code>steps_per_mile_MAD &lt;- steps_per_mile %&gt;% ungroup() %&gt;% filter(Distance&gt;0) %&gt;%
+  distinct(Steps.Per.Mile) %&gt;% summarize(MAD=mad(Steps.Per.Mile))
+
+steps_per_mile_MAD</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##     MAD
+##   &lt;dbl&gt;
+## 1  10.3</code></pre>
+<p><em>The mean absolute variance is only 10.3 steps, which is relatively low for this type of measure. This means that I walk a fairly consistent amount of steps in each mile.</em></p>
+<p><strong>4. Correlations have the potential to be very telling with this data set. A correlation analysis was done to see how the numeric variables relate to one another. I specifically hoped to see a strong, negative correlation between the times I watched Netflix and different active measurements like distance travelled, steps taken, or calories burned.</strong></p>
+<pre class="r"><code>correlation &lt;- full_longer %&gt;% select(-Title) %&gt;% unique() %&gt;%
+  na.omit() %&gt;% select_if(is.numeric) %&gt;% cor()
+correlation</code></pre>
+<pre><code>##                      Time.Watched.Netflix Minutes.Sedentary Minutes.of.Activity
+## Time.Watched.Netflix           1.00000000         0.2064987         -0.05560398
+## Minutes.Sedentary              0.20649869         1.0000000         -0.34221475
+## Minutes.of.Activity           -0.05560398        -0.3422148          1.00000000
+## Calories.Burned               -0.12189153        -0.6391227          0.45652814
+## Activity.Calories             -0.10985289        -0.6771122          0.48615755
+## Steps                         -0.08442759        -0.5749067          0.43302132
+## Distance                      -0.08558295        -0.5712176          0.43017023
+##                      Calories.Burned Activity.Calories       Steps    Distance
+## Time.Watched.Netflix      -0.1218915        -0.1098529 -0.08442759 -0.08558295
+## Minutes.Sedentary         -0.6391227        -0.6771122 -0.57490669 -0.57121759
+## Minutes.of.Activity        0.4565281         0.4861576  0.43302132  0.43017023
+## Calories.Burned            1.0000000         0.9472681  0.96924785  0.96690083
+## Activity.Calories          0.9472681         1.0000000  0.92031791  0.91821477
+## Steps                      0.9692479         0.9203179  1.00000000  0.99851555
+## Distance                   0.9669008         0.9182148  0.99851555  1.00000000</code></pre>
+<p><strong>These correlations can be better represented by a correlation heat map. This plot represents the level of correlation by different colors. Here, the stronger positive correlations are shown by the red boxes and the stronger negative correlations are shown by the yellow blocks. The orange blocks represent more weak correlations.</strong></p>
+<pre class="r"><code>tidycorrelation &lt;- correlation %&gt;% as.data.frame %&gt;% rownames_to_column %&gt;%
+  pivot_longer(-1, names_to=&quot;name&quot;,values_to=&quot;correlation&quot;)
+plot1 &lt;- tidycorrelation %&gt;% ggplot(aes(rowname, name, fill=correlation)) + geom_tile() +
+  scale_fill_gradient2(low=&quot;yellow&quot;, mid=&quot;orange&quot;, high=&quot;red&quot;) +
+  coord_fixed() + theme(axis.text.x = element_text(angle=90)) + 
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+plot1</code></pre>
+<p><img src="/project1final_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" />
+<em>There is a relatively significant negative correlation between minutes sedentary and data such as steps, distance, active calories, and burned calories. This was predicted, as the longer I am sedentary the less likely I am to have high activity statistics. Also as expected, there is a strong positive correlation among variables such as steps, distance, and calories burned. This makes sense, as all of these variables tend to be affected in similar ways due to activity. There was a negative correlation between the times Netflix was watched and distance, steps, calories, and active minutes. Unfortunately, this correlation was fairly weak. There was a positive, though not extremely strong, correlation between time Netflix was watched and sedentary minutes. This did represent the expected data, as I predicted that I would be more sedentary on days when I watched a lot of Netflix.</em></p>
+<p><strong>5. Focusing in on the Netflix data, the times Netflix was watched was illustrated by a bar plot. This data was facet wrapped by month, so each month has its own distribution displayed. </strong></p>
+<pre class="r"><code>month &lt;- full_wider %&gt;% separate(mmdd, into=c(&quot;mm&quot;, &quot;dd&quot;), sep=2)  %&gt;%
+  mutate(mm2=as.numeric(mm)) %&gt;%
+  na.omit() %&gt;% select(-Title) %&gt;% unique() %&gt;% 
+  mutate(mm3 = recode(mm2,&quot;Jan&quot;,&quot;Feb&quot;,&quot;Mar&quot;,&quot;Apr&quot;,&quot;May&quot;,&quot;Jun&quot;,&quot;Jul&quot;,&quot;Aug&quot;,&quot;Sep&quot;,&quot;Oct&quot;,&quot;Nov&quot;,&quot;Dec&quot;)) %&gt;%
+  mutate(mm4 = reorder(mm3, mm2)) %&gt;% arrange(mm2)
+plot2 &lt;- ggplot(month, aes(x=dd, y=Time.Watched.Netflix, color=mm3)) +
+  geom_bar(stat=&quot;summary&quot;) + facet_wrap(~mm4) +
+  ggtitle(&quot;Netflix Viewing Distributions per Month of 2019&quot;) +
+  xlab(&quot;Day of the Month&quot;) + ylab(&quot;Netflix Episodes Watched&quot;) +
+  theme(legend.position=&quot;none&quot;, axis.text.x = element_text(angle=90))
+plot2</code></pre>
+<p><img src="/project1final_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" />
+<em>This layout emphasizes the months that had little Netflix viewing, which includes February, May, and June. It also emphasizes the months that had the most viewing, which includes Septermber and October. Though there is no common pattern of Netflix viewing among all the months, the distribution within each individual month can be telling; there was a lot more Netflix watched during the beginning of January, so the drop probably corresponds with classes starting back up. March had the highest viewing in the middle of the month, which likely corresponds to spring break. May and June were both low which likely occured due to finals and the onset of summer classes. November and December both had higher viewing towards the end of the month, which for November likely correspponded to Thanksgiving break and December corresponding to classes ending.</em></p>
+<p><strong>6. More categorical variables can be created from the preexisting variables. The “Title” variable was manipulated to create separate variables for the show title and the episode title. This was limited to only “Friends”, “Grey’s Anatomy”, “New Girl”, and “The Office”, as these are my favorite and most watched shows.</strong></p>
+<pre class="r"><code>friends &lt;- full_wider %&gt;% na.omit() %&gt;% filter(grepl(&quot;Friends&quot;, Title)) %&gt;% 
+  separate(Title, into=c(&quot;Show&quot;, &quot;Episode&quot;), sep=7) %&gt;% 
+  separate(Episode, into=c(NA, &quot;Episode&quot;), sep=2)
+greys_anatomy &lt;- full_wider %&gt;% na.omit() %&gt;% filter(grepl(&quot;Grey&quot;, Title)) %&gt;%
+  separate(Title, into=c(&quot;Show&quot;, &quot;Episode&quot;), sep=14) %&gt;% 
+  separate(Episode, into=c(NA, &quot;Episode&quot;), sep=2) %&gt;%
+  mutate(Show=gsub(&quot;&#39;&quot;, &quot;&quot;, Show))
+new_girl&lt;- full_wider %&gt;% na.omit() %&gt;% filter(grepl(&quot;New Girl:&quot;, Title)) %&gt;%
+  separate(Title, into=c(&quot;Show&quot;, &quot;Episode&quot;), sep=8) %&gt;% 
+  separate(Episode, into=c(NA, &quot;Episode&quot;), sep=2)
+office &lt;- full_wider %&gt;% na.omit() %&gt;% filter(grepl(&quot;Office&quot;, Title)) %&gt;%
+  separate(Title, into=c(&quot;Show&quot;, &quot;Episode&quot;), sep=17) %&gt;% 
+  separate(Episode, into=c(NA, &quot;Episode&quot;), sep=2)
+show &lt;- rbind(friends, greys_anatomy, new_girl, office) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 533
+## Columns: 12
+## $ mmdd                   &lt;chr&gt; &quot;0323&quot;, &quot;0525&quot;, &quot;0525&quot;, &quot;0525&quot;, &quot;0601&quot;, &quot;0601&quot;…
+## $ Show                   &lt;chr&gt; &quot;Friends&quot;, &quot;Friends&quot;, &quot;Friends&quot;, &quot;Friends&quot;, &quot;F…
+## $ Episode                &lt;chr&gt; &quot;Season 2: The One Where Heckles Dies&quot;, &quot;Seaso…
+## $ Time.Watched.Netflix   &lt;dbl&gt; 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 6, 6, 6, 6…
+## $ Minutes.Sedentary      &lt;dbl&gt; 1432, 1235, 1235, 1235, 1440, 1440, 1440, 1263…
+## $ Minutes.Lightly.Active &lt;int&gt; 8, 189, 189, 189, 0, 0, 0, 37, 37, 37, 103, 0,…
+## $ Minutes.Fairly.Active  &lt;int&gt; 0, 2, 2, 2, 0, 0, 0, 9, 9, 9, 0, 0, 4, 4, 4, 4…
+## $ Minutes.Very.Active    &lt;int&gt; 0, 14, 14, 14, 0, 0, 0, 15, 15, 15, 0, 0, 20, …
+## $ Calories.Burned        &lt;dbl&gt; 1397, 1891, 1891, 1891, 1374, 1374, 1374, 1596…
+## $ Activity.Calories      &lt;dbl&gt; 30, 652, 652, 652, 0, 0, 0, 265, 265, 265, 292…
+## $ Steps                  &lt;dbl&gt; 28, 5574, 5574, 5574, 0, 0, 0, 3110, 3110, 311…
+## $ Distance               &lt;dbl&gt; 0.01, 2.70, 2.70, 2.70, 0.00, 0.00, 0.00, 1.61…</code></pre>
+<p><strong>This new dataset contains a variable for the show title; we can later perform other summary statistics now on this new data based on a new grouping: show title! Below is the proportion of times each show was watched in comparison to the other shows.</strong></p>
+<pre class="r"><code>prop &lt;- show %&gt;% group_by(Show) %&gt;% summarize(n=n()) %&gt;% mutate(frequency = n/sum(n))
+prop</code></pre>
+<pre><code>## # A tibble: 4 x 3
+##   Show                  n frequency
+##   &lt;chr&gt;             &lt;int&gt;     &lt;dbl&gt;
+## 1 Friends             210     0.394
+## 2 Greys Anatomy       151     0.283
+## 3 New Girl             87     0.163
+## 4 The Office (U.S.)    85     0.159</code></pre>
+<p><em>Based on these results, I watched “Friends” around 200 times in 2019! About 40% of my Netflix viewing was “Friends”, about 28% was “Grey’s Anatomy”, about 16% was “New Girl”, and about 16% was “The Office”.</em></p>
+<p><strong>7. With so much Netflix viewing, I questioned whether I had watched the same episode more than once during 2019.</strong></p>
+<pre class="r"><code>distinct_ep &lt;- netflix_cut %&gt;% na.omit() %&gt;% select(Title) %&gt;% n_distinct()
+distinct_ep</code></pre>
+<pre><code>## [1] 584</code></pre>
+<pre class="r"><code>total_ep &lt;- netflix_cut %&gt;% na.omit() %&gt;% select(Title) %&gt;% count()
+total_ep</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##       n
+##   &lt;int&gt;
+## 1   584</code></pre>
+<p><em>Because the total episodes watched is equal to the number of distinct episodes watched (584), it was concluded that there were no episodes watched more than once.</em></p>
+<p><strong>8. Another categorical variable was created based on the “mmdd” variable. This new variable categorizes the time of the month. It considers the first 10 days of the month “early”, the next 10 days of the month “middle”, and the last 10/11 days “late”.</strong></p>
+<pre class="r"><code>month_divisions &lt;- full_wider %&gt;% separate(mmdd, into=c(&quot;mm&quot;, &quot;dd&quot;), sep=2) %&gt;%
+  mutate(part_of_month=case_when(dd&lt;=&quot;10&quot;~&quot;early&quot;, dd&gt;=&quot;11&quot; &amp; dd&lt;=&quot;20&quot;~&quot;middle&quot;, dd&gt;=&quot;21&quot;~&quot;late&quot;)) %&gt;%
+  select(mm, dd, part_of_month, everything()) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 809
+## Columns: 13
+## $ mm                     &lt;chr&gt; &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;, &quot;01&quot;…
+## $ dd                     &lt;chr&gt; &quot;01&quot;, &quot;02&quot;, &quot;02&quot;, &quot;02&quot;, &quot;02&quot;, &quot;02&quot;, &quot;02&quot;, &quot;02&quot;…
+## $ part_of_month          &lt;chr&gt; &quot;early&quot;, &quot;early&quot;, &quot;early&quot;, &quot;early&quot;, &quot;early&quot;, &quot;…
+## $ Title                  &lt;chr&gt; NA, &quot;Grey&#39;s Anatomy: Season 11: Got to Be Real…
+## $ Time.Watched.Netflix   &lt;dbl&gt; 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 2, …
+## $ Minutes.Sedentary      &lt;dbl&gt; 1221, 1396, 1396, 1396, 1396, 1396, 1396, 1396…
+## $ Minutes.Lightly.Active &lt;int&gt; 219, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 0…
+## $ Minutes.Fairly.Active  &lt;int&gt; 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0…
+## $ Minutes.Very.Active    &lt;int&gt; 0, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 0, …
+## $ Calories.Burned        &lt;dbl&gt; 1913, 1567, 1567, 1567, 1567, 1567, 1567, 1567…
+## $ Activity.Calories      &lt;dbl&gt; 692, 206, 206, 206, 206, 206, 206, 206, 206, 2…
+## $ Steps                  &lt;dbl&gt; 5817, 3109, 3109, 3109, 3109, 3109, 3109, 3109…
+## $ Distance               &lt;dbl&gt; 2.49, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42…</code></pre>
+<p><strong>Summary statistics were then computed after grouping by these time of month variables. This would illustrate any significant differences or patterns that occur between data at different parts of the month. The displayed results were selected for “calories burned”&quot; which will represent activity, “minutes sedentary”&quot; which represents a lack of activity, and “time watched netflix” to represent Netflix viewing.</strong></p>
+<pre class="r"><code>summary_stats2 &lt;- month_divisions %&gt;% group_by(part_of_month) %&gt;% select_if(is.numeric)
+month_mean &lt;- summary_stats2  %&gt;% summarise_all(mean)
+month_mean %&gt;% select(part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)</code></pre>
+<pre><code>## # A tibble: 3 x 4
+##   part_of_month Time.Watched.Netflix Minutes.Sedentary Calories.Burned
+##   &lt;chr&gt;                        &lt;dbl&gt;             &lt;dbl&gt;           &lt;dbl&gt;
+## 1 early                         4.35             1185.           1788.
+## 2 late                          5.53             1255.           1787.
+## 3 middle                        4.47             1271.           1703.</code></pre>
+<pre class="r"><code>month_sd &lt;- summary_stats2 %&gt;% summarise_all(sd)
+month_sd %&gt;% select(part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)</code></pre>
+<pre><code>## # A tibble: 3 x 4
+##   part_of_month Time.Watched.Netflix Minutes.Sedentary Calories.Burned
+##   &lt;chr&gt;                        &lt;dbl&gt;             &lt;dbl&gt;           &lt;dbl&gt;
+## 1 early                         4.86              266.            297.
+## 2 late                          4.82              210.            336.
+## 3 middle                        3.95              216.            302.</code></pre>
+<pre class="r"><code>month_min &lt;- summary_stats2 %&gt;% summarise_all(min)
+month_min %&gt;% select(part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)</code></pre>
+<pre><code>## # A tibble: 3 x 4
+##   part_of_month Time.Watched.Netflix Minutes.Sedentary Calories.Burned
+##   &lt;chr&gt;                        &lt;dbl&gt;             &lt;dbl&gt;           &lt;dbl&gt;
+## 1 early                            0               479            1350
+## 2 late                             0               518            1350
+## 3 middle                           0               502            1350</code></pre>
+<pre class="r"><code>month_max &lt;- summary_stats2 %&gt;% summarise_all(max)
+month_max %&gt;% select(part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)</code></pre>
+<pre><code>## # A tibble: 3 x 4
+##   part_of_month Time.Watched.Netflix Minutes.Sedentary Calories.Burned
+##   &lt;chr&gt;                        &lt;dbl&gt;             &lt;dbl&gt;           &lt;dbl&gt;
+## 1 early                           17              1440            2763
+## 2 late                            17              1440            2562
+## 3 middle                          14              1440            2684</code></pre>
+<p><em>Looking at the averages, Netflix viewing was the highest at the end of the months, while minutes sedentary was the lowest at the beginning of the months and calories burned was the highest at the beginning of the months. The minimum times of Netflix viewing was 0 regardless of time of the month, and the minutes sedentary was the lowest for the beginning of the month. The minimum calories burned was the same for all times of the month, as this is my basal metabolic rate and can not vary below this value. The maximum Netflix viewing was higher for the beginning and end of the months than in the middle, while minutes sedentary was the same for all parts of the month and calories burned maxed at the beginning of the months. Overall, it seems as if I was more active during the beginning of months and more sedentary towards the end of the months. My Netflix viewing seemed to follow a similar trend by increasing and peaking at the end of the month when sedentary minutes increased.</em></p>
+<p><strong>9. Now that we have 2 categorical variables, the data was grouped by both time of month and show watched so summary statistics could be performed on this criteria. These results would be interpreted as the statistics of when I was watching a certain show during the certain time of the month.</strong></p>
+<pre class="r"><code>month_divisions_unite &lt;- month_divisions %&gt;% unite(mm, dd, col=&quot;mmdd&quot;, sep=&quot;&quot;) %&gt;% 
+  select(mmdd, part_of_month) %&gt;% glimpse() </code></pre>
+<pre><code>## Rows: 809
+## Columns: 2
+## $ mmdd          &lt;chr&gt; &quot;0101&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;, &quot;0102&quot;,…
+## $ part_of_month &lt;chr&gt; &quot;early&quot;, &quot;early&quot;, &quot;early&quot;, &quot;early&quot;, &quot;early&quot;, &quot;early&quot;, &quot;…</code></pre>
+<pre class="r"><code>month_show &lt;- full_join(month_divisions_unite, show, by=&quot;mmdd&quot;)
+
+summary_stats3 &lt;- month_show %&gt;% group_by(part_of_month, Show) %&gt;%
+   select_if(is.numeric)
+
+show_month_mean &lt;- summary_stats3  %&gt;% summarise_all(mean) %&gt;% na.omit()
+show_month_mean %&gt;% select(Show, part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)</code></pre>
+<pre><code>## # A tibble: 12 x 5
+## # Groups:   part_of_month [3]
+##    Show        part_of_month Time.Watched.Netf… Minutes.Sedenta… Calories.Burned
+##    &lt;chr&gt;       &lt;chr&gt;                      &lt;dbl&gt;            &lt;dbl&gt;           &lt;dbl&gt;
+##  1 Friends     early                      13.0             1304.           1731.
+##  2 Greys Anat… early                       7.96             997.           1894.
+##  3 New Girl    early                       1.8              882.           1782 
+##  4 The Office… early                       4.93            1390.           1529.
+##  5 Friends     late                       10.9             1292.           1864.
+##  6 Greys Anat… late                        6.95            1299.           1716.
+##  7 New Girl    late                        7.05            1424.           1438.
+##  8 The Office… late                        9.91            1049.           2155.
+##  9 Friends     middle                     11.1             1320.           1687.
+## 10 Greys Anat… middle                      5.60            1313.           1683.
+## 11 New Girl    middle                      5.35            1371.           1594.
+## 12 The Office… middle                      7.62            1303.           1712.</code></pre>
+<pre class="r"><code>show_month_sd &lt;- summary_stats3 %&gt;% summarise_all(sd) %&gt;% na.omit()
+show_month_sd %&gt;% select(Show, part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)</code></pre>
+<pre><code>## # A tibble: 12 x 5
+## # Groups:   part_of_month [3]
+##    Show        part_of_month Time.Watched.Netf… Minutes.Sedenta… Calories.Burned
+##    &lt;chr&gt;       &lt;chr&gt;                      &lt;dbl&gt;            &lt;dbl&gt;           &lt;dbl&gt;
+##  1 Friends     early                      5.35             105.             266.
+##  2 Greys Anat… early                      2.77             329.             273.
+##  3 New Girl    early                      0.447            312.             241.
+##  4 The Office… early                      1.04              45.8            142.
+##  5 Friends     late                       4.52              89.3            265.
+##  6 Greys Anat… late                       3.16             140.             284.
+##  7 New Girl    late                       2.16              43.9            185.
+##  8 The Office… late                       1.92              48.0            399.
+##  9 Friends     middle                     3.57              94.2            264.
+## 10 Greys Anat… middle                     1.89             156.             307.
+## 11 New Girl    middle                     1.37             105.             228.
+## 12 The Office… middle                     3.59              64.4            169.</code></pre>
+<pre class="r"><code>show_month_min &lt;- summary_stats3 %&gt;% summarise_all(min) %&gt;% na.omit()
+show_month_min %&gt;% select(Show, part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)</code></pre>
+<pre><code>## # A tibble: 12 x 5
+## # Groups:   part_of_month [3]
+##    Show        part_of_month Time.Watched.Netf… Minutes.Sedenta… Calories.Burned
+##    &lt;chr&gt;       &lt;chr&gt;                      &lt;dbl&gt;            &lt;dbl&gt;           &lt;dbl&gt;
+##  1 Friends     early                          1             1133            1374
+##  2 Greys Anat… early                          1              553            1393
+##  3 New Girl    early                          1              743            1350
+##  4 The Office… early                          3             1330            1355
+##  5 Friends     late                           1             1160            1350
+##  6 Greys Anat… late                           2              775            1355
+##  7 New Girl    late                           1             1302            1350
+##  8 The Office… late                           1             1014            1562
+##  9 Friends     middle                         2             1120            1355
+## 10 Greys Anat… middle                         1              693            1355
+## 11 New Girl    middle                         2              869            1350
+## 12 The Office… middle                         1             1235            1355</code></pre>
+<pre class="r"><code>show_month_max &lt;- summary_stats3 %&gt;% summarise_all(max) %&gt;% na.omit()
+show_month_max %&gt;% select(Show, part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)</code></pre>
+<pre><code>## # A tibble: 12 x 5
+## # Groups:   part_of_month [3]
+##    Show        part_of_month Time.Watched.Netf… Minutes.Sedenta… Calories.Burned
+##    &lt;chr&gt;       &lt;chr&gt;                      &lt;dbl&gt;            &lt;dbl&gt;           &lt;dbl&gt;
+##  1 Friends     early                         17             1440            2330
+##  2 Greys Anat… early                         10             1440            2330
+##  3 New Girl    early                          2             1440            1890
+##  4 The Office… early                          6             1440            1843
+##  5 Friends     late                          17             1440            2235
+##  6 Greys Anat… late                          11             1440            2118
+##  7 New Girl    late                           9             1440            2074
+##  8 The Office… late                          11             1440            2561
+##  9 Friends     middle                        14             1440            2292
+## 10 Greys Anat… middle                         8             1440            2292
+## 11 New Girl    middle                         7             1440            1926
+## 12 The Office… middle                        14             1440            1940</code></pre>
+<p><em>When viewing these results, the most significant average drop occurred in my sedentary minutes at the beginning of the month when “New Girl” and “Grey’s Anatomy” was watched, along with a large variation in these values. The most significant increase occurred in the number of calories burned when I watched “The Office”&quot; at the end of the month. I had the lowest minutes sedentary when “Grey’s Anatomy”&quot; was watched at the beginning of the month, and the highest calories burned at the end of the month when “The Office” was watched. The greatest time Netflix was watched was when “Friends” was watched in the beginning and the end of the month, while the least Netflix was watched at the beginning of the month when “New Girl” was watched.</em></p>
+<p><strong>10. We can compare the minutes of activity to the number of calories burned, based on the level of activity performed. This plot helps illustrate how different levels of activity and how long that activity was performed contribute to the different amounts of calories burned, based on the slope.</strong></p>
+<pre class="r"><code>full_longer_plot &lt;- full_longer %&gt;% filter(Minutes.of.Activity&gt;0, Activity.Calories&gt;0)
+plot3 &lt;- ggplot(full_longer_plot, aes(Minutes.of.Activity, Activity.Calories, color=Level.of.Activity)) + 
+  geom_point() + scale_color_discrete(breaks=c(&quot;Lightly&quot;,&quot;Fairly&quot;,&quot;Very&quot;)) +
+  ggtitle(&quot;Calories Burned Due to Increasing Minutes of Different Activity Levels&quot;) +
+  xlab(&quot;Minutes of Activity&quot;) + ylab(&quot;Calories Burned&quot;)
+plot3</code></pre>
+<p><img src="/project1final_files/figure-html/unnamed-chunk-25-1.png" width="672" style="display: block; margin: auto;" />
+<em>Looking at the resulting plot, there is a linear relationship between the minutes of light activity performed and the number of calories burned. The relationship of fairly active minutes and very active minutes to calories burned is not as clear. However, both of these levels of activity have a much higher slope than that of the lightly active, which demonstrates the fact that fairly and very active minutes yield a higher calorie burn than the light activity.</em></p>
+</div>
+<div id="clustering" class="section level2">
+<h2>Clustering</h2>
+<p><strong>PAM was used to cluster the data. These clusters were based on the Minutes of Activity, Steps, and ultimately compared to Level of Activity. First, data had to be scaled and the optimal number of clusters was determined based on the maximum silhouette width.</strong></p>
+<pre class="r"><code>library(cluster)
+pam_data &lt;- full_longer %&gt;% select(Minutes.of.Activity, Steps, Level.of.Activity)
+sil_width&lt;-vector()
+for(i in 2:10){
+  pam1 &lt;- pam(pam_data, k = i) 
+  sil_width[i] &lt;- pam1$silinfo$avg.width
+}
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name=&quot;k&quot;,breaks=1:10) +
+  ggtitle(&quot;Visualizing Silouette Width&quot;)</code></pre>
+<p><img src="/project1final_files/figure-html/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" />
+<em>The number of clusters that best shows the data was k=5. This is because the plot shows a relatively large silhouette width without creating too many clusters at this point.</em></p>
+<p><strong>Based on the plot above, 5 clusters were used for performing the PAM test. The results were then plotted as Minutes of Activity vs. Steps, with observation colors based on the cluster assigned.</strong></p>
+<pre class="r"><code>pam1 &lt;- pam_data %&gt;% pam(k=5)
+pam1</code></pre>
+<pre><code>## Medoids:
+##        ID Minutes.of.Activity Steps Level.of.Activity
+## [1,] 1252                  54  7094                 2
+## [2,]  687                  15  3110                 3
+## [3,] 2410                   0     0                 2
+## [4,] 1337                  38 10638                 1
+## [5,] 1446                  61 14470                 3
+## Clustering vector:
+##   [1] 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3
+##  [38] 3 3 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 4 4 4 5 5
+##  [75] 5 1 1 1 4 4 4 5 5 5 1 1 1 5 5 5 4 4 4 2 2 2 2 2 2 2
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 2327 entries ]
+## Objective function:
+##    build     swap 
+## 734.5097 657.4608 
+## 
+## Available components:
+##  [1] &quot;medoids&quot;    &quot;id.med&quot;     &quot;clustering&quot; &quot;objective&quot;  &quot;isolation&quot; 
+##  [6] &quot;clusinfo&quot;   &quot;silinfo&quot;    &quot;diss&quot;       &quot;call&quot;       &quot;data&quot;</code></pre>
+<pre class="r"><code>pam2 &lt;- pam_data %&gt;% mutate(cluster=as.factor(pam1$clustering))
+pam2 %&gt;% ggplot(aes(Minutes.of.Activity,Steps, color=cluster)) + geom_point() + ggtitle(&quot;Clusters of Data of Steps based on Minutes of Activity&quot;)</code></pre>
+<p><img src="/project1final_files/figure-html/unnamed-chunk-27-1.png" width="672" style="display: block; margin: auto;" />
+<em>The plot above illustrates that each cluster is much more dependent on steps then minutes of activity, as there is a wide range of minutes of activity in each cluster but a small range of steps in each cluster.</em></p>
+<p><strong>It would be helpful to find if these clusters represent another variable in the data set. It is possible that different levels of activity could correspond to the clusters, as visualized below.</strong></p>
+<pre class="r"><code>pam2 %&gt;% ggplot(aes(Minutes.of.Activity,Steps,shape=cluster, color=Level.of.Activity)) + geom_point() +
+  scale_color_discrete(breaks=c(&quot;Lightly&quot;,&quot;Fairly&quot;,&quot;Very&quot;)) + ggtitle(&quot;Clusters of Activity Data Compared to Level of Activity&quot;)</code></pre>
+<p><img src="/project1final_files/figure-html/unnamed-chunk-28-1.png" width="672" style="display: block; margin: auto;" />
+<em>Unlike the clusters, the levels of activity tend to correspond more to the minutes of activity than it does to the steps. It is possible that the clusters in this case do not correspond to any such variable that is already within the data set. However, it is possible that the clusters correspond to other variables not explicitly meaured. For example, because the clusters are based on steps, it is possible that there is a confounding variable such as class schedule that creates these clusters. Maybe on certain days, I walk a certain range of steps based on how many and where my classes are. This would make sense based on 5 clusters being an optimal number, as I have 5 different walking/class schedules a week!</em></p>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>The Netflix and Ftibit data set has a lot of interesting features that were explored. Some information was discovered simply through performing summary stats. For example, basal metabolic rate was revealed when finding that the minimum calories I had burned in a day was 1350 calories. Through the mean, it was found that I watched an average of 5 episodes of Netflix per day in 2019. Through a correlation analysis, it was found that many active measurements such as minutes active, calories burned, steps, and distance had strong, positive correlations while minutes sedentary and times Netflix was watched had a mild positive correlation. Plotting episodes of Netflix watched against time showed that the most Netflix was watched in September and October while the least was viewed in February, May, and June. There was no clear pattern across all months of Netflix viewing fluctuations.</p>
+<p>Some other information was found through more complex steps. Through cumulative sum it was found that I walked a total of 2,214,779 steps and 973 miles in 2019. I walked an average of 2,291 steps in a mile with a mean absolute variance of only 10.3 steps, which is relatively low for this type of measure and reveals consistency. By creating a new variable that had the show title, it was found that about 40% of my Netflix viewing was
+“Friends”, about 28% was “Grey’s Anatomy”, about 16% was “New Girl”, and about 16% was “The Office”. All episodes watched during the year were unique, with none watched more than once. A new variable was created that partitioned the month into early, middle, and late and it was found that Netflix viewing tended to increase on average as the month progresses. Clustering was not extremely telling with this data set, as there were not observations that were necessarily expected to fall into different clusters. Every day is a different day, and my habits did not necessarily follow each other in a clear way.</p>
+</div>

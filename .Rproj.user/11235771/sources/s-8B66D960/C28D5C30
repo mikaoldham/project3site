@@ -2,18 +2,18 @@
     "collab_server" : "",
     "contents" : "",
     "created" : 1589217736887.000,
-    "dirty" : false,
+    "dirty" : true,
     "encoding" : "UTF-8",
     "folds" : "",
     "hash" : "0",
     "id" : "C28D5C30",
     "lastKnownWriteTime" : 1589244000,
-    "last_content_update" : 1589244000316,
+    "last_content_update" : 1589292794227,
     "path" : "~/Desktop/files/UT Semester 6/Comp Bio/projects.md",
     "project_path" : null,
     "properties" : {
-        "cursorPosition" : "18,0",
-        "scrollLine" : "0"
+        "cursorPosition" : "16,14",
+        "scrollLine" : "6"
     },
     "relative_order" : 7,
     "source_on_save" : false,

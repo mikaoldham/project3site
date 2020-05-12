@@ -20,9 +20,9 @@ theme = "hugo-sustain"
   custom_js  = []
 
 [params.social]
-  Github        = "username"
+  Github        = "mikaoldham"
   Email         = "mikaoldham@utexas.edu"
-  LinkedIn      = "mika-oldham"
+  LinkedIn      = "mikaoldham"
 
 
 ## Main Menu

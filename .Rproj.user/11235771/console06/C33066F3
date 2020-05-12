@@ -1,3 +1,48 @@
 [K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kgit init
 Reinitialized existing Git repository in /Users/c.oldham/Website_mio289/.git/
 ]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git add .
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git commit -m "first website commit"
+[master 41cce91] first website commit
+ Committer: C. Oldham <c.oldham@Cs-MacBook-Air.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 3 insertions(+), 7 deletions(-)
+ rewrite .Rproj.user/11235771/console06/C33066F3 (81%)
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git remote add origin https://github.com/mikaoldham/website.gt[Kit
+fatal: remote origin already exists.
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git push origin master
+error: cannot run rpostback-askpass: No such file or directory
+Username for 'https://github.com': mikaoldham
+error: cannot run rpostback-askpass: No such file or directory
+Password for 'https://mikaoldham@github.com': 
+remote: Repository not found.
+fatal: repository 'https://github.com/USERNAME/WEBSITE_REPOSITORY.git/' not found
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git remote set-url origin https://github.com/taylorlwolf/SDSProject.git[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kmikaoldham/website.git
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git --version
+git version 2.20.1 (Apple Git-117)
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git remote rm origin
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git remote add origin https://github.com/USERNAME/REPOSITORY.git[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[KMIKAOLDHAM/WEBSITE.GTI[K[KIT
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git push -u origin master
+error: cannot run rpostback-askpass: No such file or directory
+Username for 'https://github.com': MIKAOLDHAM          mikaoldham
+error: cannot run rpostback-askpass: No such file or directory
+Password for 'https://mikaoldham@github.com': 
+remote: Repository not found.
+fatal: repository 'https://github.com/MIKAOLDHAM/WEBSITE.GIT/' not found
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ cd ~/Desktop/Website[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kc.oldham/project3site
+bash: cd: /Users/c.oldham/c.oldham/project3site: No such file or directory
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ cd ~/c.oldham/Website_mio289
+bash: cd: /Users/c.oldham/c.oldham/Website_mio289: No such file or directory
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ cd ~/Desktop/Website_mio289c.oldham/Website_mio289[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kc.oldham/Website_mio289
+bash: cd: /Users/c.oldham/c.oldham/Website_mio289: No such file or directory
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ 

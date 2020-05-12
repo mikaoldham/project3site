@@ -5,16 +5,16 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "543805266",
+    "hash" : "2301794314",
     "id" : "512F29D5",
-    "lastKnownWriteTime" : 1589302200,
-    "last_content_update" : 1589302200476,
+    "lastKnownWriteTime" : 1589304434,
+    "last_content_update" : 1589304434561,
     "path" : "~/Website_mio289/content/project2final.Rmd",
     "project_path" : "content/project2final.Rmd",
     "properties" : {
-        "cursorPosition" : "341,0",
+        "cursorPosition" : "3,17",
         "last_setup_crc32" : "A63A374C420e7fcd",
-        "scrollLine" : "339"
+        "scrollLine" : "0"
     },
     "relative_order" : 8,
     "source_on_save" : false,

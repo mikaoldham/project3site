@@ -45,4 +45,4 @@ bash: cd: /Users/c.oldham/c.oldham/project3site: No such file or directory
 bash: cd: /Users/c.oldham/c.oldham/Website_mio289: No such file or directory
 ]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ cd ~/Desktop/Website_mio289c.oldham/Website_mio289[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kc.oldham/Website_mio289
 bash: cd: /Users/c.oldham/c.oldham/Website_mio289: No such file or directory
-]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ 
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git add .

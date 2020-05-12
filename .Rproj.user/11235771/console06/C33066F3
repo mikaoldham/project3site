@@ -826,4 +826,5 @@ remote: Resolving deltas:   0% (0/14)[Kremote: Resolving deltas:   7% (1/14)[
 To https://github.com/mikaoldham/project3site.git
    6aa5c4f..6be5919  master -> master
 ]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ 
-]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ 
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ ^Cgit add .
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git add .

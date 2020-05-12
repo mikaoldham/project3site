@@ -6,10 +6,19 @@
     <description>Recent content in Blogs on Mika Oldham - Portfolio</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Thu, 23 Jul 2015 21:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Tue, 12 May 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Exploring Python</title>
+      <link>/blog/exploring-python/</link>
+      <pubDate>Tue, 12 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/exploring-python/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Hello R Markdown</title>

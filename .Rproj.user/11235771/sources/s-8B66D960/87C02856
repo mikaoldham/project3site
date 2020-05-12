@@ -5,13 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "2938851388",
+    "hash" : "2219570564",
     "id" : "87C02856",
-    "lastKnownWriteTime" : 1589305586,
-    "last_content_update" : 1589305586,
+    "lastKnownWriteTime" : 1589306093,
+    "last_content_update" : 1589306093463,
     "path" : "~/Website_mio289/content/blog/2020-05-12-exploring-python.Rmd",
     "project_path" : "content/blog/2020-05-12-exploring-python.Rmd",
     "properties" : {
+        "cursorPosition" : "9,5",
+        "scrollLine" : "0"
     },
     "relative_order" : 8,
     "source_on_save" : false,

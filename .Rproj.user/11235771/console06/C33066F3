@@ -1,7 +1,3 @@
-cd ~/Desktop/Website_mio289
-bash: cd: /Users/c.oldham/Desktop/Website_mio289: No such file or directory
-]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ cd ~/Desktop/PROJECT_DIRECTORY_NAMEWebsite[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[KWebsite_mio289[K
-bash: cd: /Users/c.oldham/Desktop/Website_mio28: No such file or directory
-]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git init[K[K[K[K[K[K[K[Kgit init #initialize local git respository
+[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kgit init
 Reinitialized existing Git repository in /Users/c.oldham/Website_mio289/.git/
-]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git add . #add all files in repository to be uploaded
+]0;~/Website_mio289(base) Cs-MacBook-Air:Website_mio289 c.oldham$ git add .

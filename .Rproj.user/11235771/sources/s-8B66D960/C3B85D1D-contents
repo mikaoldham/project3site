@@ -13,7 +13,7 @@ theme = "hugo-sustain"
 [params]
   avatar = "newpic.png"
   author = "Mika Oldham"
-  description = "Describe your website"
+  description = "A personal page displaying my resume, project accomplishments, and ways to contact me."
 
   # Custom assets can be linked with their paths relative to static/
   custom_css = []
@@ -23,7 +23,6 @@ theme = "hugo-sustain"
   Github        = "mikaoldham"
   Email         = "mikaoldham@utexas.edu"
   LinkedIn      = "mikaoldham4430291a8"
-  Facebook      = "mikaoldham3"
 
 
 ## Main Menu

@@ -6,7 +6,7 @@
     <description>Recent content on Mika Oldham - Portfolio</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Sun, 15 Mar 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 01 May 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
@@ -18,6 +18,15 @@
       
       <guid>/blog/exploring-python/</guid>
       <description></description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting Headache Status</title>
+      <link>/project2final/</link>
+      <pubDate>Fri, 01 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/project2final/</guid>
+      <description>Introduction to the data: The following data was pulled from a study by Tammy Kostecki-Dillon that was conducted on patients who suffered chronic headaches. The numeric variables include “id” which identifies each patient, “dos” which measures the time in days since the patient began participation in the study, “time” which measures the time in days since the onset of treatment during the study (with negative values representing the number of days before the onset of treatment), “age” which measures the age in years of the patient, and “airq” which measures the air quality index for that day with a higher air index representing worse air quality and a lower index representing better air quality.</description>
     </item>
     
     <item>
@@ -50,15 +59,6 @@
       <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
 You can embed an R code chunk like this:
 summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
-    </item>
-    
-    <item>
-      <title>Project 2: Modeling, Testing, and Predicting Headache Status</title>
-      <link>/project2final/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project2final/</guid>
-      <description>Introduction to the data: The following data was pulled from a study by Tammy Kostecki-Dillon that was conducted on patients who suffered chronic headaches. The numeric variables include “id” which identifies each patient, “dos” which measures the time in days since the patient began participation in the study, “time” which measures the time in days since the onset of treatment during the study (with negative values representing the number of days before the onset of treatment), “age” which measures the age in years of the patient, and “airq” which measures the air quality index for that day with a higher air index representing worse air quality and a lower index representing better air quality.</description>
     </item>
     
   </channel>

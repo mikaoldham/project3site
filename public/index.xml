@@ -58,7 +58,7 @@ summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 2
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/project2final/</guid>
-      <description>###Introduction to the data: The following data was pulled from a study by Tammy Kostecki-Dillon that was conducted on patients who suffered chronic headaches. The numeric variables include “id” which identifies each patient, “dos” which measures the time in days since the patient began participation in the study, “time” which measures the time in days since the onset of treatment during the study (with negative values representing the number of days before the onset of treatment), “age” which measures the age in years of the patient, and “airq” which measures the air quality index for that day with a higher air index representing worse air quality and a lower index representing better air quality.</description>
+      <description>Introduction to the data: The following data was pulled from a study by Tammy Kostecki-Dillon that was conducted on patients who suffered chronic headaches. The numeric variables include “id” which identifies each patient, “dos” which measures the time in days since the patient began participation in the study, “time” which measures the time in days since the onset of treatment during the study (with negative values representing the number of days before the onset of treatment), “age” which measures the age in years of the patient, and “airq” which measures the air quality index for that day with a higher air index representing worse air quality and a lower index representing better air quality.</description>
     </item>
     
   </channel>

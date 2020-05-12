@@ -1,0 +1,9 @@
+---
+title: Exploring Python
+author: Mika Oldham
+date: '2020-05-12'
+slug: exploring-python
+categories: []
+tags: []
+description: ''
+---

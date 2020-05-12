@@ -1,0 +1,2 @@
+"0","fitvals <- fit1$fitted.values"
+"0","ggplot() + geom_point(aes(fitvals, resids)) + geom_hline(yintercept=0)"

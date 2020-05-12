@@ -1,0 +1,4 @@
+"0","library(plotROC)"
+"0","headache4$prob<-predict(fit3,type=""response"")"
+"0","ROC <- ggplot(headache4) + geom_roc(aes(d=headache_occur, m=prob), n.cuts=0)"
+"0","ROC"

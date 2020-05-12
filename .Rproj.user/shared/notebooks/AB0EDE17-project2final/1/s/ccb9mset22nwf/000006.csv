@@ -1,0 +1,1 @@
+"0","headache %>% group_by(hatype) %>% summarize(mean(age), mean(airq))"

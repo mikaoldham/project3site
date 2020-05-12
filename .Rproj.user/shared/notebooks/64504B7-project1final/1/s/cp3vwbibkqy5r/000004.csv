@@ -1,0 +1,5 @@
+"0","netflix <- read.csv(""NetflixViewingHistory.csv"")"
+"0","library(tidyverse)"
+"2","Error: package or namespace load failed for ‘tidyverse’ in loadNamespace(j <- i[[1L]], c(lib.loc, .libPaths()), versionCheck = vI[[j]]):
+ there is no package called ‘tidyr’
+"

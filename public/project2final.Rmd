@@ -1,0 +1,345 @@
+---
+title: 'Project 2: Modeling, Testing, and Predicting Headache Status'
+author: "Mikayla Oldham - mio289"
+date: ''
+output:
+  pdf_document: null
+  word_document: default
+  html_document:
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+
+class_diag <- function(probs,truth){
+#CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV
+tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+acc=sum(diag(tab))/sum(tab)
+sens=tab[2,2]/colSums(tab)[2]
+spec=tab[1,1]/colSums(tab)[1]
+ppv=tab[2,2]/rowSums(tab)[2]
+if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+#CALCULATE EXACT AUC
+ord<-order(probs, decreasing=TRUE)
+probs <- probs[ord]; truth <- truth[ord]
+TPR=cumsum(truth)/max(1,sum(truth))
+FPR=cumsum(!truth)/max(1,sum(!truth))
+dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+n <- length(TPR)
+auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+data.frame(acc,sens,spec,ppv,auc)
+}
+```
+
+###Introduction to the data:
+The following data was pulled from a study by Tammy Kostecki-Dillon that was conducted on patients who suffered chronic headaches. The **numeric variables** include "id" which identifies each patient, "dos" which measures the time in days since the patient began participation in the study, "time" which measures the time in days since the onset of treatment during the study (with negative values representing the number of days before the onset of treatment), "age" which measures the age in years of the patient, and "airq" which measures the air quality index for that day with a higher air index representing worse air quality and a lower index representing better air quality. The first **categorical variable** is "hatype" which identifies the type of headache as being "aura" for a aura headache,  "non-aura" for a headache that does not contain aura symptoms, or "mixed" for a headache that demonstrates some symptoms of a normal headache and some symptoms of an aura headache. The next categorical variable is "medication" which identifies the level of treatment through whether it is being "continued", "reduced", or "none" for stopped treatment. The last categorical variables are "headache" which identifies a day with a headahe as "yes" and a day without a headache as "no", while "sex" represents whether the patient is "male" or "female". There are a total of **4152 observations** in this data set.
+
+As someone who frequently experiences symptoms of auras prior to a migraine, I found this data set to be really interesting! I was eager to see if there were any aspects that might predict the onset of auras, and the variables in the data provided a great opportunity to explore this through regressions. A glimpse of the data is shown below:
+
+```{R}
+headache <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/carData/KosteckiDillon.csv")
+headache <- headache %>% select(-X)
+head(headache)
+```
+
+###MANOVA & ANOVA 
+The following MANOVA test was conducted to determine if any considered numeric variable, age or airquality, had significantly different mean values for the different types of headaches: aura, non-aura, or mixed. This test could be important for further analysis testing if certain demographic factors, such as age or airquality in the city of residence, can cause people to have a predisposition for certain types of headaches. 
+
+First, the assumptions were checked:
+
++ The tested data was from a **random sample** and the observations were **independent** $\checkmark$
++ **Multivariate Normality**:
+```{R}
+ggplot(headache, aes(x = age, y = airq)) + 
+  geom_point(alpha=.5) + geom_density_2d(h=2) +
+  coord_fixed() + facet_wrap(~hatype)
+```
+Based on these plots, there is no clear normality of the data in each group. Therefore, the assumption of multivariate normality is not met and we proceed with caution.
+
++ **Homogeneity of within-group covariance matrices**:
+```{R}
+covariance <- headache %>% group_by(hatype) %>% do(covs=cov(.[5:6]))
+for(i in 1:3){print(as.character(covariance$hatype[i]))
+print(covariance$covs[i])}
+```
+The covariance among all headache types appear to differ. The homogeneity of covariance assumption is not met so again, we proceed with caution.
+
+After checking assumptions, the test was conducted. 
+
++ Ho: For both age and airquality, the means of the headache type groups are equal. 
+
++ HA: For atleast one of the response variables, either age, airquality, or both, atleast 1 of the headache type means is different than the others. 
+```{R}
+man <- manova(cbind(age, airq) ~ hatype, data=headache)
+summary(man)
+```
+Based on these results, there is a significant difference among the headache types for atleast one of the dependent variables (p<0.001). 
+
+Since the MANOVA results were significant, **univariate ANOVA tests** were run to see which dependent variable, age or airquality, had a significantly different mean value for atleast one of the headache types.
+```{R}
+summary.aov(man) 
+```
+The ANOVA results show that both age (p<.001) and airquality (p<.001) have significant mean differences for atleast one of the headache types. This was prior to adjusting the significance level based on the type 1 error rate, which will be discussed further below. 
+
+Since the ANOVA results were found to be significant, **post-hoc analysis tests** were conducted to determine which headache type had differing means for the age variable and for the airquality variable.
+```{R}
+headache %>% group_by(hatype) %>% summarize(mean(age), mean(airq))
+pairwise.t.test(headache$airq, headache$hatype, p.adj="none")
+pairwise.t.test(headache$age, headache$hatype, p.adj="none")
+```
+According to the pairwise comparisons, all three headache types had significantly different mean values of airquality (p<0.001). For the age variable, it was found that all headache types had different mean values (p<.001) except for when comparing age values for "aura" headaches and "mixed" headaches (p=.12). Again, these significance comparison values were based on alpha=0.05, but adjusted significant levels are discussed below. The conclusion that "aura" and "mixed" groups do not have significantly different mean ages is consistent with the average values seen in the table above, as these two groups had average values both at about 40 years, while the "no aura" group had a higher average age of about 44 years. Likewise, the airquality conclusion of all different averages is supported by the fact that the "no aura" group had an average airquality of almost 26, the "aura" group had an average airquality of about 24, and the "mixed" group has an average airquality of about 22.
+
+Next, the **probability of Type I errors** was recalculated because there were 9 hypothesis tests total (1 MANOVA, 2 ANOVA, and 6 pairwise t-tests). Because the probability of executing a Type I error increases with each comparison, and there were 9 tests conducted above, the probability was corrected by: 
+```{R}
+#P(type l error):
+1-((.95)^9)
+```
+The corrected probablity of a Type 1 error, based on the 9 hypothesis tests that were conducted, ends up being 0.3698. This is higher than the normal error rate we see with one test, which is 0.05, because each individual test has the 0.05 error rate. 
+
+To account for this increase in probability of Type 1 error due to repeated hypothesis tests, the **Bonferroni correction** was applied. The new alpha-p-value used for significance comparisons was calculated by:
+```{R}
+#Bonferroni corrected alpha:
+.05/9
+```
+By dividing the alpha value for one test by the number of tests conducted, the new alpha value used for comparisons is .00556. This means that by comparing test p-values to this corrected alpha-p-value, we keep the overall Type I error rate at .05. When using this Bonferroni corrected alpha value for the tests conducted above, all results that were considered significant before remain significant because they are all less than alpha=.00556; average age differed between all headache types except for "aura" and "mixed", while average airquality differed between all headache types.
+
+*It is important to note that though we found significant differences in the means among headache types, the assumptions were not all initially met. Therefore, the interpretations of these results are not necessarily reliable. For example, because the covariances were not found to be homogenous across groups, the mean differeneces could be due to inconsistent variance and not necessarily significant differences due to group type.
+
+###Randomization Test
+A randomization test was performed to simulate the paired t-test in a different way. This time, we focused on airquality and presence of headache to see if airquality differed at times when someone experienced a headache as opposed to when they did not experience a headache. These results could lead to studies that determine if airquality has an effect on headache onset.
+
+First, the mean differences in airquality for the different headache responses were calculated. Then, responses of air quality were randomly assigned to headache presence and a **null distribution** was created.
+```{R}
+real <- (mean(headache[headache$headache=="yes",]$airq) - 
+           mean(headache[headache$headache=="no",]$airq))
+real
+random <- vector()
+for(i in 1:5000){
+  mixed <- data.frame(airq=sample(headache$airq), presence=headache$headache)
+  random[i] <- (mean(mixed[mixed$presence=="yes",]$airq) -
+                  mean(mixed[mixed$presence=="no",]$airq))}
+{hist(random, main="Null Distribution", xlab="Difference in Airquality"); 
+  abline(v = 0.2849134, col="red"); abline(v = -0.2849134, col="red")}
+```
+
+
+From the created null distribution, the hypotheses were tested by comparing the actual mean difference to the null distribution.
+
++ Ho: Airquality does not differ significantly for days that headaches were experienced versus days that headaches were not experienced.
+
++ HA: Airquality differs significantly for days that headaches were experienced versus days that headaches were not experienced.
+
+The p-value was then calculated. This value tells the probability that the real mean difference is observed under the null distribution which assumes no association between airquality and headache presence.
+```{R}
+mean(random > 0.2849134 | random < -0.2849134)
+```
+The p-value was calculated to be 0.3498, which means there is almost a 35% chance that we would observe the real mean difference of air quality when there is no association between air quality and headache presence. This value is much larger than alpha=.05, therefore we fail to reject the null hypothesis and must assume that airquality does not differ significantly for days that headaches were experienced versus days that headaches were not experienced.
+
+###Linear Regression
+A linear regression was run to determine the effects of sex, age, and their interaction on the proportion of days that a participant experienced a headache. Predicting the occurance of a headache from age and sex might help see if certain people are more likely to experience headaches than others. In order to do this, a new variable called "prop_head" was created that represented the proportion of days in the study that the individual experienced a headache. The variable of "age" was also mean centered, represented by "age_c". Then, the regression was run with these new variables.
+```{R}
+headache2 <- headache %>% select(id, age, sex, headache) %>% 
+  group_by(id) %>% mutate(prop_head=mean(headache=="yes")) %>%
+  select(-headache) %>% distinct()
+headache2$age_c <- headache2$age - mean(headache2$age)
+
+fit1 <- lm(prop_head~age_c+sex+age_c*sex, data=headache2)
+summary(fit1)
+```
+The summary of the linear regression reveals the coefficients, which can be interpreted as: "intercept" shows that for a female of average age, the  proportion of days that headaches are experienced is predicted to be .646629; "age_c" states that for every 1 year age increase, the predicted proportion of headache days decreases by .002155; "sexmale" shows that for a person of average age, their proportion of headache days is predited to decrease by .011201 if they are male; "age_c:sexmale" shows that for males, a 1 year increase in age decreases the predicted proportion of headache days by .005369 more than for females.
+
+This regression can be visualized by:
+```{R}
+ggplot(fit1, aes(age_c, prop_head, color=sex)) + geom_point() + 
+  geom_smooth(method='lm', se=F) + 
+  ggtitle("Proportion of Headache Days by Age and Sex")
+```
+
+Going back, the assumptions of linearity, normality, and homoskedasticity need to be checked prior to interpreting these results with any confidence.
+
+- **Linearity**: 
+```{R}
+ggplot(headache2, aes(age_c, prop_head)) + geom_point() + 
+  ggtitle("Proportion of Headache Days by Age")
+```
+The linearity assumption is met, as there is no evidence of curves in the scatterplot of age vs proportion of headaches. $\checkmark$
+
+- **Normality**: The Shapiro-Wilk test was conducted to test the assumption of normality.
+
+    - Ho: The distribution is normal
+    - HA: The distribution is not normal
+
+
+```{R}
+resids <- fit1$residuals
+shapiro.test(resids)
+```
+The results of the Shapiro-Wilk test show that p<.001, so we reject the null hypothesis and assume that the distribution is not normal. Therefore, the assumption of normality is not passed.
+
+- **Homodskedasticity**: 
+```{R}
+fitvals <- fit1$fitted.values
+ggplot() + geom_point(aes(fitvals, resids)) + geom_hline(yintercept=0)
+```
+Though the variance of the residuals does not necessarily look equal along the entirety of the line, there is no obvious fanning of the points. Therefore, the assumption of homoskedasticity is met. $\checkmark$
+
+Even though the assumption of homoskedasticity was met, the regression was recomputed with **robust standard errors**:
+```{R}
+library(sandwich)
+library(lmtest)
+coeftest(fit1, vcov=vcovHC(fit1))
+```
+After recomputing with robust standard errors, there was not much change seen in the regression results. The standard errors increased slightly (except for "sexmale" that saw a slight decrease), and the p-values followed this trend with a slight increase (except for "sexmale" which slightly decreased). All p-values were much greater than .001, which means they are not significant predictors for proportion of headache days. Along with this, the coefficients remained relatively unchanged as well. Looking at the **R-squared value**, we see that the proportion of variation in the response variable that is explained by the overall model is only .003097. This is an extremely low proportion, signifying a weak model.
+
+###Bootstrapped Standard Errors
+Because the normality assumption was not passed, the same regressin was run again with bootstrapped standard errors:
+```{R}
+headache2 <- headache2 %>% ungroup() %>% select(-id)
+
+set.seed(1234)
+samp_dist <- replicate(5000, {
+boot <- sample_frac(headache2, replace=T)
+fit2 <- lm(prop_head~age_c*sex, data=boot)
+coef(fit2)
+})
+
+samp_dist %>% t %>% as.data.frame %>% summarize_all(sd)
+```
+With bootstrapping the standard errors, the standard errors for all variables decreased very slightly, though these changes are almost negligable amounts. The change observed is the same for both the original model and the robust standard error model, as they both had relatively the same values. Because all of the standard errors slightly decreased, this means all of the p-values should also slightly decrease from their values in the original model.
+
+###Logistic Regression
+Next, a logistic regression was run to determine how days since onset of treatment and whether the medication is being continued, reduced, or discontinued can predict whether the patient had a headache or not. This might be important in seeing how the length of time that treatment was administered or the level of the treatment can predict the response of headache occurances in patients.
+First, the "headache" variable was converted into a binary. Then, the regression was run.
+```{R}
+headache4 <- headache %>% mutate(headache_occur=ifelse(headache=="yes",1,0)) %>% 
+  select(headache_occur, time, medication)
+headache4$medication <- factor(headache4$medication, ordered = FALSE )
+headache4$medication <- relevel(headache4$medication, ref="none")
+fit3 <- glm(headache_occur~time+medication, data=headache4, family="binomial")
+coeftest(fit3)
+coeftest(fit3) %>% exp
+```
+The logistic regression resulted in the following coefficients: the "intercept" coefficient says that for someone who is experiencing at 0 days of treatment who is in the "none" group of treatment, the odds of experiencing a headache is .86450; the "time" coefficient says that for every 1 day increase in time, their odds of experiencing a headache decreases and is .99479 times the odds for someone on day 0 of treatment in the "none" group; the "medicationcontinuing" coefficient says that for someone who will be continuing medication, their odds of experiencing a headache increases and is 2.32025 times the odds for someone who is not getting treatment; the "medicationreduced" coefficient says that for someone who has reduced medication, their odds of experiencing a headache increases and is 4.52674 times higher than someone who is continuing treatment. 
+
+A **confusion matrix**, comparing the true headache occurance versus the predicted headache occurance, can be shown by:
+```{R}
+prob <- predict(fit3, type = "response")
+pred <- ifelse(prob > 0.5, 1, 0)
+table(prediction = pred, truth = headache4$headache_occur) %>% addmargins
+```
+Based on this confusion matrix, the model predicted 2323 true positives, 440 true negatives, 343 false negatives, and 1046 false positives. The extremely high false positive rate signifies that this model overpredicts headache occurance, when in reality a lot of these patients did not experience headaches. This can be further analyzed through:
+```{R}
+#accuracy:
+(440+2323)/4152
+
+#sensitivity(TPR):
+(2323)/2666
+
+#specificity(TNR):
+(440)/1486
+
+#Recall(PPV):
+(2323)/3369
+```
+The **accuracy** rate, or the proportion of predictions that correctly depicted reality, is fairly high at .6654624. The **sensitivity**, or the proportion of headache occurances that were correctly predicted to be headache occurances, is also pretty high at .8713428. However, the **specificity**, or the proportion of non-headache occurances correctly classified as non-headache occurances, was low at only .2960969. The **recall**, or proportion of the classified headache occurances that actually were headache occurances, was a fair proportion at .6895221. Though the model is not very good at predicting with specificity, it is much stronger at predicting with sensitivity. These strengths and weaknesses balance out when we look at the average overall accuracy (we see the trade-offs!).
+
+The **density of log-odds** (logit) by headache occurance can be shown by:
+```{R}
+headache4$logit <- predict(fit3, type="link")
+headache4 %>% ggplot(aes(logit, fill=factor(headache_occur))) +
+  geom_density(alpha=.3) + geom_vline(xintercept=0, color='red') +
+  labs(fill="headache")
+```
+From this plot, the rates described above are illustrated. The high sensitivity is demonstrated by the high blue peaks above the logit=0 line, as this indicates true headache occurances that were predicted to be headache occurances. The low specificity is shown by the low pink peak below the logit=0 line, as this indicates that not many of the true non-headache occurances were classified as such. The average value for recall is seen by the fact that though there are a lot of correctly classified headache occurances (blue peaks to the right of the logit=0 line), there is still a significant number of non-headache occurances that were classified as headaches (pink peaks to the right of the logit=0 line). The grey "overlapped density" areas represent logit values where both true headache occurances and non-headache occurances happen, therefore areas where logit is not a good predictor to differentiate between the two headache groups.
+
+Another way to represent these rates is with an **ROC curve** and **AUC** calculation:
+```{R}
+library(plotROC)
+headache4$prob<-predict(fit3,type="response")
+ROC <- ggplot(headache4) + geom_roc(aes(d=headache_occur, m=prob), n.cuts=0)
+ROC
+calc_auc(ROC)
+```
+The ROC curve shows us the relationship between false positives and true positives as we change the cutoff value for the model. Ideally, the true positive rate would stay high even as we increase the false positive rate, resulting in an AUC value of 1. The AUC value we calculated of .6271121 tells us that the model is a poor predictor of headache occurance. This weakness is demonstrated by the shape of the ROC curve, as the true positive rate remains relatively low for a while even as the false positive rate increases. Though the model is poor, it might not be completely useless as the AUC value is above a value of .5, which would mean the model predicts no better than choosing a response at random. 
+
+**Cross-validation** can be used on this model to see how it can be applied to other data other than that which was used to produce the model:
+```{R}
+set.seed(1234)
+k=10
+
+data <- headache4[sample(nrow(headache4)),]
+fold <- cut(seq(1:nrow(headache4)), breaks=k, labels=F)
+val <- NULL
+for(i in 1:k){
+  trainset <- data[fold!=i,]
+  testset <- data[fold==i,]
+  truth <- testset$headache_occur
+  fit4 <- glm(headache_occur~medication+time, data=trainset, family="binomial")
+  prob <- predict(fit4, newdata=testset, type="response")
+  val <- rbind(val, class_diag(prob, truth))
+}
+summarize_all(val, mean)
+```
+After a 10-fold cross-validation, the AUC remains about the same at .6265165. The average out-of-sample accuracy is .6652352, while the sensitivity is .8714029 and the recall is .6893232. These values only vary slightly from the full-model values. 
+
+###LASSO
+Focusing only on Aura and non-Aura headaches (excluding the "mixed" headache patients), a LASSO regression was run to see which variables best predict the type of headache that the patient experiences. These results could tell us what factors best predict a future patient's probability of having aura headaches as opposed to non-aura headaches.
+```{R}
+library(glmnet)
+headache5 <- headache %>% select(-id) %>% filter(hatype!="Mixed")
+y <- as.matrix(headache5$hatype)
+x <- model.matrix(hatype~., data=headache5)[,-1]
+head(x)
+
+x <- scale(x)
+cv <- cv.glmnet(x, y, family = "binomial")
+lasso <- glmnet(x, y, family = "binomial", lambda = cv$lambda.1se)
+coef(lasso)
+```
+Based on the LASSO regression, using "lambda.1se" in order to maximize regularization, all variables were retained except for "time". This means that in order to maximize the strength of the model as a predictor without overfitting to the current data, "time" should be excluded. This can be further analyzed through a **10-fold cross-validation**:
+```{R}
+headache6 <- headache5 %>% select(-time) %>% mutate(hatype=ifelse(hatype=="Aura",1,0))
+set.seed(1234)
+k=10
+data2 <- headache6 %>% sample_frac
+folds2 <- ntile(1:nrow(data2), n=10)
+val2 <- NULL
+for(i in 1:k){
+  trainset2 <- data2[folds2!=i,]
+  testset2 <- data2[folds2==i,]
+  truth2 <- testset2$hatype
+  fit5 <- glm(hatype~., data=trainset2, family="binomial")
+  prob2 <- predict(fit5, newdata=testset2, type="response")
+  val2 <- rbind(val2, class_diag(prob2, truth2))
+}
+val2 %>% summarize_all(mean)
+```
+The out-of-sample accuracy for this regression is .2511389. This is much lower than the accuracy of the previous logistic regression which was .6652352 (note however that we are predicting a difference response here). Though these variables were chosen as the best predictors for the model based on what the model was provided, the variables themselves might still not be significant predictors of headache type in real life and therefore the low accuracy. 
+
+###Summary
+Overall, these tests analyzed differences between headache occurances and types in different demographics. These tools might be helpful in diagnosing the type of headache or frequency of headaches that someone is prone to based on factors such as age or airquality. The MANOVA, ANOVA, and post-hoc tests found that for all headache types, the average airquality differed significantly while the average age differed significantly for all headache types except for when comparing "mixed" headaches and "aura" headaches. The randomization test focused in on average airquality for when people experienced headaches versus when they did not, and it was found that there was no significant difference between airquality average values during headache occurance versus when a headache was not experienced. The linear regression found that though age and sex were not necessarily significant predictors of proportion of headache days, 1 year increases and being male both predicted decreased proportion of headache days in comparison to females of average age. The logistic regression found that both days since the onset of treatment and the level of treatment administered were both significant predictors of headache occurance! The occurance of a headache was predicted to increase significantly for patients who continued or reduced treament, while the occurance of headache was predicted to decrease with increased treatment time. Further clinical tests could be conducted based on this result to determine if the changes in headache occurance was due to the change in medicine level (if headache occurance had a predicted decrease without treatment because the treatment was detrimental), or if the medicine level was changed due to a change in headache occurance (if headache occurance had a prediced decrease without treatment because headache occurance lowered and therefore treatment was stopped). 
+
+Though many of the variables tested did not end up being significant predictors of headache occurance, research that does not support a theory can still be valuable! Further tests can be shaped on a lack of significance, as knowledge that age or aiquality for example do not cause someone to be prone to increased proportions of headaches can be helpful in the development of treatment plans. 
+...
+
+
+

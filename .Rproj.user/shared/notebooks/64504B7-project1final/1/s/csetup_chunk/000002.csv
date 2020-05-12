@@ -1,0 +1,2 @@
+"0","knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = ""center"", warning = F, message = F,"
+"0","tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))"

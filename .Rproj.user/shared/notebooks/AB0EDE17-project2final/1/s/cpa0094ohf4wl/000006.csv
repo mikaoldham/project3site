@@ -1,0 +1,2 @@
+"0","ggplot(headache2, aes(age_c, prop_head)) + geom_point() + "
+"0","  ggtitle(""Proportion of Headache Days by Age"")"

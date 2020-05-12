@@ -1,0 +1,4 @@
+"0","headache4$logit <- predict(fit3, type=""link"")"
+"0","headache4 %>% ggplot(aes(logit, fill=factor(headache_occur))) +"
+"0","  geom_density(alpha=.3) + geom_vline(xintercept=0, color='red') +"
+"0","  labs(fill=""headache"")"

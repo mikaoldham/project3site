@@ -1,0 +1,3 @@
+"0","ggplot(fit1, aes(age_c, prop_head, color=sex)) + geom_point() + "
+"0","  geom_smooth(method='lm', se=F) + "
+"0","  ggtitle(""Proportion of Headache Days by Age and Sex"")"

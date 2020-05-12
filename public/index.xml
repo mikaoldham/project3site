@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Mika Oldham - Portfolio</title>
+    <link>/</link>
+    <description>Recent content on Mika Oldham - Portfolio</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Sun, 02 Oct 2016 22:55:05 -0400</lastBuildDate>
+    
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Sun, 02 Oct 2016 22:55:05 -0400</pubDate>
+      
+      <guid>/projects/</guid>
+      <description>Projects Below are some of the projects I have recently competed:
+  Exploratory Analysis of Netflix and Fitbit Data using Tidyverse Tools
+  Modeling, testing, and Classifying Aura Headache Data
+  </description>
+    </item>
+    
+    <item>
+      <title>Hello R Markdown</title>
+      <link>/blog/2015-07-23-r-rmarkdown/</link>
+      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
+      
+      <guid>/blog/2015-07-23-r-rmarkdown/</guid>
+      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
+You can embed an R code chunk like this:
+summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
+    </item>
+    
+    <item>
+      <title>Project 1: Exploratory Data Analysis of Netflix and Fitbit Statistics During 2019</title>
+      <link>/project1final/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project1final/</guid>
+      <description>Introduction The following data was gathered and combined from two difference sources: my personal Fitbit data from the Fitbit website and my personal Netflix viewing history from the Netflix website. Once joined by date, these data sets contained information such as Netflix titles watched, calories burned, active minutes, sedentary minutes, number of steps, and more. It was interesting to explore data that was based on my own life experiences, as I often wonder how much time I spend doing certain things or if I demonstrate different life patterns.</description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting Headache Status</title>
+      <link>/project2final/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project2final/</guid>
+      <description>###Introduction to the data: The following data was pulled from a study by Tammy Kostecki-Dillon that was conducted on patients who suffered chronic headaches. The numeric variables include “id” which identifies each patient, “dos” which measures the time in days since the patient began participation in the study, “time” which measures the time in days since the onset of treatment during the study (with negative values representing the number of days before the onset of treatment), “age” which measures the age in years of the patient, and “airq” which measures the air quality index for that day with a higher air index representing worse air quality and a lower index representing better air quality.</description>
+    </item>
+    
+  </channel>
+</rss>

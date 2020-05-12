@@ -1,0 +1,357 @@
+---
+title: 'Project 1: Exploratory Data Analysis of Netflix and Fitbit Statistics During 2019'
+author: "Mikayla Oldham - mio289"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+```{r setup, include=FALSE, class.output = ".bordered"}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+r = getOption("repos")
+r["CRAN"] = "http://cran.us.r-project.org"
+options(repos = r)
+install.packages("tidyverse")
+```
+
+## Introduction
+The following data was gathered and combined from two difference sources: my personal Fitbit data from the Fitbit website and my personal Netflix viewing history from the Netflix website. Once joined by date, these data sets contained information such as Netflix titles watched, calories burned, active minutes, sedentary minutes, number of steps, and more. It was interesting to explore data that was based on my own life experiences, as I often wonder how much time I spend doing certain things or if I demonstrate different life patterns. I was mainly expecting to find relations between Netflix viewing data and activity statistics that represented a negative correlation, showing that the more I watch Netflix, the less I am active. Ulimately, the results would hopeful encourage a switch from Netflix viewing to better activity habits!
+
+## Gathering and Combining Data
+
+**The first data set obtained was my personal Fitbit data. It consists of measurements for steps, distance travelled, minutes of different levels of activity, calories burned, and more active measurements for each day. Each data set was read in by month from the Fitbit website, then combined to form a singular Fitbit data set.**
+```{R}
+jan_fit <- read.csv("january2019_fitbit2.csv" )
+feb_fit <- read.csv("February2019_fitbit.csv")
+mar_fit <- read.csv("March2019_fitbit.csv")
+apr_fit <- read.csv("April_fitbit.csv")
+may_fit <- read.csv("May2019_fitbit.csv")
+june_fit <- read.csv("June2019_fitbit.csv")
+july_fit <- read.csv("July2019_fitbit.csv")
+aug_fit <- read.csv("August2019_fitbit.csv")
+sep_fit <- read.csv("September2019_fitbit.csv")
+oct_fit <- read.csv("October2019_fitbit.csv")
+nov_fit <- read.csv("November2019_fitbit.csv")
+dec_fit <- read.csv("December2019_fitbit.csv")
+
+fitbit_bind <- rbind(jan_fit, feb_fit, mar_fit, apr_fit, may_fit, june_fit, july_fit, aug_fit, sep_fit, oct_fit, nov_fit, dec_fit )  
+```
+  
+**The next data set was obtained from my personal Netflix viewing data. This data contains the title of each episode watched each day. These data sets were sliced down so we are only looking at the values for days in 2019.**
+```{R}
+netflix <- read.csv("NetflixViewingHistory.csv")
+library(tidyverse)
+netflix_cut <- netflix %>% slice(158:741)
+```
+
+
+**The Netfix data set and the Fitbit data set were joined by "date" to create a single data set showing variables from both individual data sets. Before the joining could occur, the "date" variable in original data sets had to be reformatted to match each other. The fitbit data was more straightforward based on the original "date" format, as only the symbols had to be removed.**
+```{R}
+fitbit_fixed <- fitbit_bind %>% separate(Date, into=c(NA, "mmdd"), sep=5)  %>% 
+  mutate(mmdd = gsub("-", "", mmdd)) %>% select(-Floors)
+glimpse(fitbit_fixed)
+```
+
+
+
+**The Netflix data took more reconfiguration based on how the "date" was originally formatted. The order of the numbers had to be rearranged, the symbols had to be removed, and zeros had to be added prior to numbers with only 1 digit. This last step required the oberservations to be sliced based on how many digits in the month and day so that the zero was placed in the correct spot. This step also included the addition of a new variable in the Netflix data frame that counted the number of times Netflix was viewed per day.**
+```{R}
+netflix_6 <- netflix_cut %>% slice(1:45, 48:101, 107:218) %>%
+  mutate(mmdd=gsub("/", "", Date)) %>% separate(mmdd, into=c("mmdd", NA), sep=4) %>% select(-Date)
+
+netflix_5_OND <- netflix_cut %>% slice(46:47, 102:106, 219:250) %>% 
+  mutate(mmdd=gsub("/", "0", Date)) %>% separate(mmdd, into=c("mmdd", NA), sep=4) %>% select(-Date)
+
+netflix_5 <- netflix_cut %>% slice(251:359, 371:416, 432:466, 483:487, 490:493, 515:562) %>% 
+  mutate(mmdd=gsub("/", "", Date)) %>% separate(mmdd, into=c("mmdd", NA), sep=3) %>% 
+  mutate(mmdd=paste0("0",mmdd)) %>% select(-Date)
+
+netflix_4 <- netflix_cut %>% slice(360:370, 417:431, 467:482, 488:489, 494:514, 563:584) %>% 
+  mutate(mmdd=gsub("/", "", Date)) %>% separate(mmdd, into=c("mmdd", NA), sep=2) %>% 
+  mutate(mmdd=paste0("0",mmdd)) %>% separate(mmdd, into=c("mm", "dd"), sep=2) %>%
+  mutate(dd=paste0("0",dd)) %>% unite(mm, dd, col="mmdd", sep="") %>% select(-Date)
+
+netflix_fixed_intm <- rbind(netflix_6, netflix_5, netflix_4, netflix_5_OND) %>%
+  arrange(mmdd)
+
+netflix_fixed1 <- netflix_fixed_intm %>%
+  group_by(mmdd) %>%
+  mutate(Time.Watched.Netflix = n_distinct(mmdd)) %>%
+  summarise_if(is.numeric, sum) 
+
+netflix_fixed <- full_join(netflix_fixed_intm, netflix_fixed1, by="mmdd")
+
+glimpse(netflix_fixed)
+```
+
+
+
+**The data was then joined using "full join". This type of function was used because we wanted to keep all observations, regardless of whether Netflix was watched that day or not. This meant that because each date was represented by Fitbit data, any observation that lacked Netflix data recieved an "NA" in the place of the Title. The lack of Netflix viewing on certain days is valuable information that was kept to be used later for further analysis.**
+```{R}
+full <- full_join(fitbit_fixed, netflix_fixed, by="mmdd") %>%
+  mutate(Time.Watched.Netflix = replace_na(Time.Watched.Netflix, 0)) %>%
+  mutate(Activity.Calories = replace_na(Activity.Calories, 0))
+
+glimpse(full)
+```
+
+
+## Tidying the Data
+
+**The original format of the data set is "wide", as there are multiple columns for the 3 different levels of activity: Lightly, Fairly, and Very. This data can be made "long" by creating a new variable for the level of activity and a separate variable for the minutes of each activity. The format of some variables were also changed in this step to be "character" or "numeric" for later analysis purposes.**
+```{R}
+full_longer <- full %>% pivot_longer(6:8, names_to="Level.of.Activity", values_to="Minutes.of.Activity") %>%
+  separate(Level.of.Activity, into=c(NA, "Level.of.Activity")) %>%
+  select(mmdd, Title, Time.Watched.Netflix, Minutes.Sedentary, Level.of.Activity,
+         Minutes.of.Activity,Calories.Burned, Activity.Calories,everything())
+
+full_longer <- full_longer %>% mutate_at(c(4,7:9),function(x)as.character(x)) %>% 
+  mutate_at(c(4,7:9),function(x)gsub(",","",x)) %>% 
+  mutate_at(c(4,7:9),function(x)as.numeric(x))
+
+glimpse(full_longer)
+```
+
+**The "long" data can then be transformed back to its original format to represent "wide" data. This new data frame best represents the data in a tidy way, so it is the one used for most of the future analysis.**
+```{R}
+full_wider <- full_longer %>% pivot_wider(names_from="Level.of.Activity", values_from="Minutes.of.Activity") %>%
+  rename("Minutes.Fairly.Active"=Fairly, "Minutes.Lightly.Active"=Lightly, "Minutes.Very.Active"=Very) %>%
+  select(mmdd, Title, Time.Watched.Netflix, Minutes.Sedentary, Minutes.Lightly.Active,
+         Minutes.Fairly.Active, Minutes.Very.Active, Calories.Burned, Activity.Calories, everything())
+
+full_wider <- full_wider %>% mutate_at(c(4,8:10),function(x)as.character(x)) %>% 
+  mutate_at(c(4,8:10),function(x)gsub(",","",x)) %>% 
+  mutate_at(c(4,8:10),function(x)as.numeric(x))
+
+glimpse(full_wider)
+```
+
+## Data Analysis: The data set was manipulated and summarized in various ways to explore different interesting aspects.
+
+**1. First, the numeric variables from the raw data were summarized based on the means, standard deviations, minimum values, and maximum values.**
+```{R}
+summary_stats1 <- full_wider %>% select_if(is.numeric)
+
+raw_mean <- summary_stats1  %>% summarise_all(mean) %>% glimpse()
+```
+*When considering the Netflix data, I averaged almost 5 episodes a day. Looking at the types of activity, I averaged the most light activity at about 102 minutes a day, then fairly active and very active both at about 12 minutes a day each. Though I walked around 10,000 to 20,000 steps on some days, my average steps per day came in only at about 5,700 because of the days that I did not wear my fitbit and effectively walked zero steps.*
+
+```{R}
+raw_sd <- summary_stats1 %>% summarise_all(sd) %>% glimpse()
+```
+```{R}
+raw_min <- summary_stats1 %>% summarise_all(min) %>% glimpse()
+```
+*Many variables have "0" as their minimum value, which is due to days of not wearing my fitbit or watching netflix. The minimum value of 1350 calories burned corresponds to what should theoretically be my basal metabolic rate, as this would be the number of calories burnt at rest without any additional activity.*
+```{R}
+raw_max <- summary_stats1 %>% summarise_all(max) %>% glimpse()
+```
+
+
+**2. While still looking at the raw data, the total number of steps taken in 2019 was found by creating a new variable that finds the cumulative sum of steps as time went on.**
+```{R}
+cumu.steps <- full_wider %>% arrange(mmdd) %>% select(-Title) %>% distinct() %>%
+  mutate(Cumu.Steps=cumsum(Steps))
+total_steps <- cumu.steps %>% select(Cumu.Steps) %>% summarise(max(Cumu.Steps))
+total_steps
+```
+*I took a total of 2,214,779 steps in 2019!*
+
+**The same was done for distance, where a new variable was created that finds the cumulative distance I travelled in 2019.**
+```{R}
+cumu.distance <- full_wider %>% arrange(mmdd) %>% select(-Title) %>% distinct() %>%
+  mutate(Cumu.Distance=cumsum(Distance))
+total_distance <- cumu.distance %>% select(Cumu.Distance) %>% 
+  summarise(max(Cumu.Distance))
+total_distance
+```
+*I walked a total of 973 miles in 2019, which is about 3.5x the entire length of the Grand Canyon!*
+
+
+**3. How many steps do I take in a mile on average? I was interested to see how consistent my steps per mile were, so a new variable was created for each day that calculated this by dividing steps by distance. **
+```{R}
+steps_per_mile <- full_wider %>% group_by(mmdd) %>% mutate(Steps.Per.Mile = Steps/Distance) %>%
+  na.omit(Steps.Per.Mile)
+
+steps_per_mile %>% ungroup() %>% filter(Distance>0) %>% summarize(mean(Steps.Per.Mile))
+```
+*It was found that on average, I walk about 2,291 steps in a mile.*
+
+**I then wanted to see how much my steps per mile differed between observations. This was done by calculating the mean absolute variation.**
+```{R}
+steps_per_mile_MAD <- steps_per_mile %>% ungroup() %>% filter(Distance>0) %>%
+  distinct(Steps.Per.Mile) %>% summarize(MAD=mad(Steps.Per.Mile))
+
+steps_per_mile_MAD
+```
+*The mean absolute variance is only 10.3 steps, which is relatively low for this type of measure. This means that I walk a fairly consistent amount of steps in each mile.*
+
+**4. Correlations have the potential to be very telling with this data set. A correlation analysis was done to see how the numeric variables relate to one another. I specifically hoped to see a strong, negative correlation between the times I watched Netflix and different active measurements like distance travelled, steps taken, or calories burned.**
+```{R}
+correlation <- full_longer %>% select(-Title) %>% unique() %>%
+  na.omit() %>% select_if(is.numeric) %>% cor()
+correlation
+```
+
+**These correlations can be better represented by a correlation heat map. This plot represents the level of correlation by different colors. Here, the stronger positive correlations are shown by the red boxes and the stronger negative correlations are shown by the yellow blocks. The orange blocks represent more weak correlations.**
+```{R}
+tidycorrelation <- correlation %>% as.data.frame %>% rownames_to_column %>%
+  pivot_longer(-1, names_to="name",values_to="correlation")
+plot1 <- tidycorrelation %>% ggplot(aes(rowname, name, fill=correlation)) + geom_tile() +
+  scale_fill_gradient2(low="yellow", mid="orange", high="red") +
+  coord_fixed() + theme(axis.text.x = element_text(angle=90)) + 
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+plot1
+```
+*There is a relatively significant negative correlation between minutes sedentary and data such as steps, distance, active calories, and burned calories. This was predicted, as the longer I am sedentary the less likely I am to have high activity statistics. Also as expected, there is a strong positive correlation among variables such as steps, distance, and calories burned. This makes sense, as all of these variables tend to be affected in similar ways due to activity. There was a negative correlation between the times Netflix was watched and distance, steps, calories, and active minutes. Unfortunately, this correlation was fairly weak. There was a positive, though not extremely strong, correlation between time Netflix was watched and sedentary minutes. This did represent the expected data, as I predicted that I would be more sedentary on days when I watched a lot of Netflix.*
+
+**5. Focusing in on the Netflix data, the times Netflix was watched was illustrated by a bar plot. This data was facet wrapped by month, so each month has its own distribution displayed. **
+```{R}
+month <- full_wider %>% separate(mmdd, into=c("mm", "dd"), sep=2)  %>%
+  mutate(mm2=as.numeric(mm)) %>%
+  na.omit() %>% select(-Title) %>% unique() %>% 
+  mutate(mm3 = recode(mm2,"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")) %>%
+  mutate(mm4 = reorder(mm3, mm2)) %>% arrange(mm2)
+plot2 <- ggplot(month, aes(x=dd, y=Time.Watched.Netflix, color=mm3)) +
+  geom_bar(stat="summary") + facet_wrap(~mm4) +
+  ggtitle("Netflix Viewing Distributions per Month of 2019") +
+  xlab("Day of the Month") + ylab("Netflix Episodes Watched") +
+  theme(legend.position="none", axis.text.x = element_text(angle=90))
+plot2
+```
+*This layout emphasizes the months that had little Netflix viewing, which includes February, May, and June. It also emphasizes the months that had the most viewing, which includes Septermber and October. Though there is no common pattern of Netflix viewing among all the months, the distribution within each individual month can be telling; there was a lot more Netflix watched during the beginning of January, so the drop probably corresponds with classes starting back up. March had the highest viewing in the middle of the month, which likely corresponds to spring break. May and June were both low which likely occured due to finals and the onset of summer classes. November and December both had higher viewing towards the end of the month, which for November likely correspponded to Thanksgiving break and December corresponding to classes ending.*
+
+**6. More categorical variables can be created from the preexisting variables. The "Title" variable was manipulated to create separate variables for the show title and the episode title. This was limited to only "Friends", "Grey's Anatomy", "New Girl", and "The Office", as these are my favorite and most watched shows.** 
+```{R}
+friends <- full_wider %>% na.omit() %>% filter(grepl("Friends", Title)) %>% 
+  separate(Title, into=c("Show", "Episode"), sep=7) %>% 
+  separate(Episode, into=c(NA, "Episode"), sep=2)
+greys_anatomy <- full_wider %>% na.omit() %>% filter(grepl("Grey", Title)) %>%
+  separate(Title, into=c("Show", "Episode"), sep=14) %>% 
+  separate(Episode, into=c(NA, "Episode"), sep=2) %>%
+  mutate(Show=gsub("'", "", Show))
+new_girl<- full_wider %>% na.omit() %>% filter(grepl("New Girl:", Title)) %>%
+  separate(Title, into=c("Show", "Episode"), sep=8) %>% 
+  separate(Episode, into=c(NA, "Episode"), sep=2)
+office <- full_wider %>% na.omit() %>% filter(grepl("Office", Title)) %>%
+  separate(Title, into=c("Show", "Episode"), sep=17) %>% 
+  separate(Episode, into=c(NA, "Episode"), sep=2)
+show <- rbind(friends, greys_anatomy, new_girl, office) %>% glimpse()
+```
+**This new dataset contains a variable for the show title; we can later perform other summary statistics now on this new data based on a new grouping: show title! Below is the proportion of times each show was watched in comparison to the other shows.**
+```{R}
+prop <- show %>% group_by(Show) %>% summarize(n=n()) %>% mutate(frequency = n/sum(n))
+prop
+```
+*Based on these results, I watched "Friends" around 200 times in 2019! About 40% of my Netflix viewing was "Friends", about 28% was "Grey's Anatomy", about 16% was "New Girl", and about 16% was "The Office".*
+
+**7. With so much Netflix viewing, I questioned whether I had watched the same episode more than once during 2019.**
+```{R}
+distinct_ep <- netflix_cut %>% na.omit() %>% select(Title) %>% n_distinct()
+distinct_ep
+total_ep <- netflix_cut %>% na.omit() %>% select(Title) %>% count()
+total_ep
+```
+*Because the total episodes watched is equal to the number of distinct episodes watched (584), it was concluded that there were no episodes watched more than once.*
+
+**8. Another categorical variable was created based on the "mmdd" variable. This new variable categorizes the time of the month. It considers the first 10 days of the month "early", the next 10 days of the month "middle", and the last 10/11 days "late".**
+```{R}
+month_divisions <- full_wider %>% separate(mmdd, into=c("mm", "dd"), sep=2) %>%
+  mutate(part_of_month=case_when(dd<="10"~"early", dd>="11" & dd<="20"~"middle", dd>="21"~"late")) %>%
+  select(mm, dd, part_of_month, everything()) %>% glimpse()
+```
+
+**Summary statistics were then computed after grouping by these time of month variables. This would illustrate any significant differences or patterns that occur between data at different parts of the month. The displayed results were selected for "calories burned"" which will represent activity, "minutes sedentary"" which represents a lack of activity, and "time watched netflix" to represent Netflix viewing.**
+```{R}
+summary_stats2 <- month_divisions %>% group_by(part_of_month) %>% select_if(is.numeric)
+month_mean <- summary_stats2  %>% summarise_all(mean)
+month_mean %>% select(part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)
+month_sd <- summary_stats2 %>% summarise_all(sd)
+month_sd %>% select(part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)
+month_min <- summary_stats2 %>% summarise_all(min)
+month_min %>% select(part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)
+month_max <- summary_stats2 %>% summarise_all(max)
+month_max %>% select(part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)
+```
+*Looking at the averages, Netflix viewing was the highest at the end of the months, while minutes sedentary was the lowest at the beginning of the months and calories burned was the highest at the beginning of the months. The minimum times of Netflix viewing was 0 regardless of time of the month, and the minutes sedentary was the lowest for the beginning of the month. The minimum calories burned was the same for all times of the month, as this is my basal metabolic rate and can not vary below this value. The maximum Netflix viewing was higher for the beginning and end of the months than in the middle, while minutes sedentary was the same for all parts of the month and calories burned maxed at the beginning of the months. Overall, it seems as if I was more active during the beginning of months and more sedentary towards the end of the months. My Netflix viewing seemed to follow a similar trend by increasing and peaking at the end of the month when sedentary minutes increased.*
+
+**9. Now that we have 2 categorical variables, the data was grouped by both time of month and show watched so summary statistics could be performed on this criteria. These results would be interpreted as the statistics of when I was watching a certain show during the certain time of the month.**
+```{R}
+month_divisions_unite <- month_divisions %>% unite(mm, dd, col="mmdd", sep="") %>% 
+  select(mmdd, part_of_month) %>% glimpse() 
+
+month_show <- full_join(month_divisions_unite, show, by="mmdd")
+
+summary_stats3 <- month_show %>% group_by(part_of_month, Show) %>%
+   select_if(is.numeric)
+
+show_month_mean <- summary_stats3  %>% summarise_all(mean) %>% na.omit()
+show_month_mean %>% select(Show, part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)
+
+show_month_sd <- summary_stats3 %>% summarise_all(sd) %>% na.omit()
+show_month_sd %>% select(Show, part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)
+
+show_month_min <- summary_stats3 %>% summarise_all(min) %>% na.omit()
+show_month_min %>% select(Show, part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)
+
+show_month_max <- summary_stats3 %>% summarise_all(max) %>% na.omit()
+show_month_max %>% select(Show, part_of_month, Time.Watched.Netflix, Minutes.Sedentary, Calories.Burned)
+
+```
+*When viewing these results, the most significant average drop occurred in my sedentary minutes at the beginning of the month when "New Girl" and "Grey's Anatomy" was watched, along with a large variation in these values. The most significant increase occurred in the number of calories burned when I watched "The Office"" at the end of the month. I had the lowest minutes sedentary when "Grey's Anatomy"" was watched at the beginning of the month, and the highest calories burned at the end of the month when "The Office" was watched. The greatest time Netflix was watched was when "Friends" was watched in the beginning and the end of the month, while the least Netflix was watched at the beginning of the month when "New Girl" was watched.*
+
+**10. We can compare the minutes of activity to the number of calories burned, based on the level of activity performed. This plot helps illustrate how different levels of activity and how long that activity was performed contribute to the different amounts of calories burned, based on the slope.**
+```{R}
+full_longer_plot <- full_longer %>% filter(Minutes.of.Activity>0, Activity.Calories>0)
+plot3 <- ggplot(full_longer_plot, aes(Minutes.of.Activity, Activity.Calories, color=Level.of.Activity)) + 
+  geom_point() + scale_color_discrete(breaks=c("Lightly","Fairly","Very")) +
+  ggtitle("Calories Burned Due to Increasing Minutes of Different Activity Levels") +
+  xlab("Minutes of Activity") + ylab("Calories Burned")
+plot3
+```
+*Looking at the resulting plot, there is a linear relationship between the minutes of light activity performed and the number of calories burned. The relationship of fairly active minutes and very active minutes to calories burned is not as clear. However, both of these levels of activity have a much higher slope than that of the lightly active, which demonstrates the fact that fairly and very active minutes yield a higher calorie burn than the light activity.*
+
+## Clustering
+
+**PAM was used to cluster the data. These clusters were based on the Minutes of Activity, Steps, and ultimately compared to Level of Activity. First, data had to be scaled and the optimal number of clusters was determined based on the maximum silhouette width.**
+```{R}
+library(cluster)
+pam_data <- full_longer %>% select(Minutes.of.Activity, Steps, Level.of.Activity)
+sil_width<-vector()
+for(i in 2:10){
+  pam1 <- pam(pam_data, k = i) 
+  sil_width[i] <- pam1$silinfo$avg.width
+}
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10) +
+  ggtitle("Visualizing Silouette Width")
+```
+*The number of clusters that best shows the data was k=5. This is because the plot shows a relatively large silhouette width without creating too many clusters at this point.*
+
+**Based on the plot above, 5 clusters were used for performing the PAM test. The results were then plotted as Minutes of Activity vs. Steps, with observation colors based on the cluster assigned.**
+```{R}
+pam1 <- pam_data %>% pam(k=5)
+pam1
+pam2 <- pam_data %>% mutate(cluster=as.factor(pam1$clustering))
+pam2 %>% ggplot(aes(Minutes.of.Activity,Steps, color=cluster)) + geom_point() + ggtitle("Clusters of Data of Steps based on Minutes of Activity")
+```
+*The plot above illustrates that each cluster is much more dependent on steps then minutes of activity, as there is a wide range of minutes of activity in each cluster but a small range of steps in each cluster.*
+
+**It would be helpful to find if these clusters represent another variable in the data set. It is possible that different levels of activity could correspond to the clusters, as visualized below.**
+```{R}
+pam2 %>% ggplot(aes(Minutes.of.Activity,Steps,shape=cluster, color=Level.of.Activity)) + geom_point() +
+  scale_color_discrete(breaks=c("Lightly","Fairly","Very")) + ggtitle("Clusters of Activity Data Compared to Level of Activity")
+```
+*Unlike the clusters, the levels of activity tend to correspond more to the minutes of activity than it does to the steps. It is possible that the clusters in this case do not correspond to any such variable that is already within the data set. However, it is possible that the clusters correspond to other variables not explicitly meaured. For example, because the clusters are based on steps, it is possible that there is a confounding variable such as class schedule that creates these clusters. Maybe on certain days, I walk a certain range of steps based on how many and where my classes are. This would make sense based on 5 clusters being an optimal number, as I have 5 different walking/class schedules a week!*
+
+## Summary
+The Netflix and Ftibit data set has a lot of interesting features that were explored. Some information was discovered simply through performing summary stats. For example, basal metabolic rate was revealed when finding that the minimum calories I had burned in a day was 1350 calories. Through the mean, it was found that I watched an average of 5 episodes of Netflix per day in 2019. Through a correlation analysis, it was found that many active measurements such as minutes active, calories burned, steps, and distance had strong, positive correlations while minutes sedentary and times Netflix was watched had a mild positive correlation. Plotting episodes of Netflix watched against time showed that the most Netflix was watched in September and October while the least was viewed in February, May, and June. There was no clear pattern across all months of Netflix viewing fluctuations. 
+
+Some other information was found through more complex steps. Through cumulative sum it was found that I walked a total of 2,214,779 steps and 973 miles in 2019. I walked an average of 2,291 steps in a mile with a mean absolute variance of only 10.3 steps, which is relatively low for this type of measure and reveals consistency. By creating a new variable that had the show title, it was found that about 40% of my Netflix viewing was
+“Friends”, about 28% was “Grey’s Anatomy”, about 16% was “New Girl”, and about 16% was “The Office”. All episodes watched during the year were unique, with none watched more than once. A new variable was created that partitioned the month into early, middle, and late and it was found that Netflix viewing tended to increase on average as the month progresses. Clustering was not extremely telling with this data set, as there were not observations that were necessarily expected to fall into different clusters. Every day is a different day, and my habits did not necessarily follow each other in a clear way.

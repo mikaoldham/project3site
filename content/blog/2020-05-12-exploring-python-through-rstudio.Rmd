@@ -7,7 +7,9 @@ categories: []
 tags: []
 description: ''
 ---
-There is a common debate among the coding world as to which language is better: R or Python. Though these languages are different and one might be preferable over the other in certain situations, there is actually a lot of overlap in the usage of R and Python. First, the python language can actually be ran and interpreted within the R-studio system. In the example below, the code is translated to Python despite bring run in R due to the specification of {python} at the beginning of the chunk:
+There is a common debate among the coding world as to which language is better: R or Python. Though these languages are different and one might be preferable over the other in certain situations, there is actually a lot of overlap in the usage of R and Python. ![R vs Python: The Numbers (via https://bigdata-madesimple.com/)](/blog/2020-05-12-exploring-python-through-rstudio_files/rvspython.jpg)
+
+First, the python language can actually be ran and interpreted within the R-studio system. In the example below, the code is translated to Python despite bring run in R due to the specification of {python} at the beginning of the chunk:
 
 ```{python}
 #Py chunk:

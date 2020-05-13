@@ -1,6 +1,10 @@
 {
-    "path" : "~/Website_mio289/content",
+    "path" : "~/Website_mio289/themes/hugo-sustain/layouts/_default",
     "sortOrder" : [
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        },
         {
             "ascending" : true,
             "columnIndex" : 2

@@ -25,3 +25,7 @@ install.packages("sandwich")
 install.packages("lmtest")
 install.packages("plotROC")
 install.packages("glmnet")
+
+install.packages("reticulate")
+library(reticulate)
+reticulate::use_condaenv()

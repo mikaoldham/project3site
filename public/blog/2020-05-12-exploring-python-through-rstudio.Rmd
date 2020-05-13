@@ -1,0 +1,28 @@
+---
+title: Exploring Python Through RStudio
+author: Mika Oldham
+date: '2020-05-12'
+slug: exploring-python-through-rstudio
+categories: []
+tags: []
+description: ''
+---
+There is a common debate among the coding world as to which language is better: R or Python. Though these languages are different and one might be preferable over the other in certain situations, there is actually a lot of overlap in the usage of R and Python. First, the python language can actually be ran and interpreted within the R-studio system. In the example below, the code is translated to Python despite bring run in R due to the specification of {python} at the beginning of the chunk:
+
+```{python}
+five_p=5
+print(five_p)
+two_p=2
+print(two_p)
+five_p**two_p
+```
+
+The same code from above in the Python chunk can be run below in the R chunk, but this time in the language of R:
+```{R}
+five_r <- 5
+five_r
+two_r <- 2
+two_r
+five_r^(two_r)
+```
+Though different notations and different languages, both codes where able to be run in R and resulted in the same, correct answer.

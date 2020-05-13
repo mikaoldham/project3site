@@ -7,7 +7,7 @@
     <meta name="author" content="Mika Oldham" />
     <meta name="description" content="A personal page displaying my resume, project accomplishments, and ways to contact me.">
     <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
-    <title>Blogs</title>
+    <title>Exploring Python Through RStudio</title>
     <meta name="generator" content="Hugo 0.70.0" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/css/main.css" />
@@ -24,6 +24,7 @@
 
   <body>
     <div id="wrap">
+
       
       <nav class="navbar navbar-default">
   <div class="container">
@@ -51,41 +52,78 @@
   </div>
 </nav>
 
+      
       <div class="container">
-        <h3>Archive</h3>
-          <div class="panel panel-default">
-            <div class="panel-body">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/blog/exploring-python-through-rstudio/">Exploring Python Through RStudio</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          May 12, 2020
+            &nbsp;&nbsp;
             
-              <div class="row">
-                <div class="col-sm-4 col-md-4 col-lg-4">
-                  <h5 style="text-align: right">
-                    May 12, 2020
-                  </h5>
-                 </div>
-                 <div class="col-sm-8 col-md-8 col-lg-8">
-                   <h5 style="text-align: left">
-                    <strong><a href="/blog/exploring-python/">Exploring Python</a></strong>
-                  </h5>
-                </div>
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<p>There is a common debate among the coding world as to which language is better: R or Python. Though these languages are different and one might be preferable over the other in certain situations, there is actually a lot of overlap in the usage of R and Python. First, the python language can actually be ran and interpreted within the R-studio system. In the example below, the code is translated to Python despite bring run in R due to the specification of {python} at the beginning of the chunk:</p>
+<pre class="python"><code>five_p=5
+print(five_p)</code></pre>
+<pre><code>## 5</code></pre>
+<pre class="python"><code>two_p=2
+print(two_p)</code></pre>
+<pre><code>## 2</code></pre>
+<pre class="python"><code>five_p**two_p</code></pre>
+<pre><code>## 25</code></pre>
+<p>The same code from above in the Python chunk can be run below in the R chunk, but this time in the language of R:</p>
+<pre class="r"><code>five_r &lt;- 5
+five_r</code></pre>
+<pre><code>## [1] 5</code></pre>
+<pre class="r"><code>two_r &lt;- 2
+two_r</code></pre>
+<pre><code>## [1] 2</code></pre>
+<pre class="r"><code>five_r^(two_r)</code></pre>
+<pre><code>## [1] 25</code></pre>
+<p>Though different notations and different languages, both codes where able to be run in R and resulted in the same, correct answer.</p>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
               </div>
-            
-              <div class="row">
-                <div class="col-sm-4 col-md-4 col-lg-4">
-                  <h5 style="text-align: right">
-                    July 23, 2015
-                  </h5>
-                 </div>
-                 <div class="col-sm-8 col-md-8 col-lg-8">
-                   <h5 style="text-align: left">
-                    <strong><a href="/blog/2015-07-23-r-rmarkdown/">Hello R Markdown</a></strong>
-                  </h5>
-                </div>
-              </div>
-            
             </div>
           </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
       </div>
+      
     </div>
+
     
     <footer>
   <div id="footer">
@@ -107,5 +145,6 @@
 <script src="/js/ie10-viewport-bug-workaround.js"></script>
 
 
+    
   </body>
 </html>

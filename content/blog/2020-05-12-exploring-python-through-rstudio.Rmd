@@ -11,6 +11,7 @@ There is a common debate among the coding world as to which language is better: 
 
 ```{python}
 #Py chunk:
+
 five_p=5
 print(five_p)
 two_p=2
@@ -21,6 +22,7 @@ five_p**two_p
 The same code from above in the Python chunk can be run below in the R chunk, but this time in the language of R:
 ```{R}
 #R chunk:
+
 five_r <- 5
 five_r
 two_r <- 2
@@ -31,16 +33,19 @@ Though different notations and different languages, both codes where able to be 
 
 So, both languages can be run in R, but what how do the functions within each language compare? Through slightly different notations, both R and Python can execute a lot of the same functions.
 
-+ One resemblance is the "numpty" add-on in Python, which parallels a lot of the  arithmetic functions that come installed with R-studio. Numpty contains an abundance of pre-defined functions. Using R, we can execute basic functions such as:
+One resemblance is the "numpty" add-on in Python, which parallels a lot of the  arithmetic functions that come installed with R-studio. Numpty contains an abundance of pre-defined functions. Using R, we can execute basic functions such as:
 ```{R}
 #R chunk:
+
 #create a vector of 10 random numbers between 1 and 100 with replacement
 set.seed(345)
 vector <- sample(1:100, 10, replace=TRUE)
 vector
+
 #find the mean of the vector
 mean_r <- mean(vector)
 mean_r
+
 #find the log of the mean
 log_r <- log(mean_r)
 log_r
@@ -48,18 +53,70 @@ log_r
 
 The same functions from R can be executed using numpy in Python:
 ```{python}
+#Py chunk:
+
 import numpy as np
 #create an array of 10 random numbers between 1 and 100 with replacement
 array1=np.random.randint(low=1, high=100, size=10)
 print(array1)
+```
+```{python}
 #to be consistent with the R code, replace the values with the randomly generated values from above by creating a new array
 array2=np.array([93, 87, 83, 95, 21, 50, 60, 84, 28, 97])
 print(array2)
+```
+```{python}
 #find the mean of the array
 mean_p=np.mean(array2)
 print(mean_p)
+```
+```{python}
 #find the log of the mean
 log_p=np.log(mean_p)
 print(log_p)
 ```
-Even though the codes slightly differ, we still get the same results! Also, notice the difference in rounding between the R answers and the Python answers. In this case, it is evident that R truncates earlier than Python does, thereofre Python is showing more exact answers. 
+Even though the codes slightly differ, we still get the same results! Also, notice the difference in rounding between the R answers and the Python answers. In the calculating of the log, it is evident that R truncates earlier than Python does, thereofre Python is showing more exact answers. 
+
+Another similar function of languages is plotting. In R, "ggplot2" can be fairly equivicated to "matplotlib" in Python. Below, we take a look at ggplot2 being put to use:
+```{R}
+#R chunk:
+
+#create variables
+x_r <- vector
+x_r
+y_r <- c(5, 10, 15, 20, 25, 30, 35, 40, 45, 50)
+y_r
+
+#create a scatterplot of x vs y
+library(ggplot2)
+plot_r <- ggplot() + geom_point(aes(x_r, y_r))
+plot_r
+
+```
+This same plot can be generated using matplotlib in Python:
+```{python}
+#Py chunk:
+
+#create variables
+x_p=array2
+print(x_p)
+y_p=np.array([5, 10, 15, 20, 25, 30, 35, 40, 45, 50])
+print(y_p)
+```
+```{python}
+#create a scatterplot of x vs y
+import matplotlib.pyplot as plt
+plt.scatter(x_p, y_p)
+```
+Both chunks of code end up creating plots that demonsrate the same data!
+
+One more important overlap is the use of functions that manipulate the data. In R, we know this tool to be "dplyr", where we can take data and create new variables, select certain columns, filter for certain observations, and much more. In Python, there are similar functions in the "panda" add-on. Below, we see dplyr being put to use with a subset of my "fitbit" dataset:
+```{R}
+fitbit_r <- read.csv("October2019_fitbit.csv")
+head(fitbit_r)
+```
+
+
+import pandas as pd
+fitbit_p=pd.read_csv("October2019_fitbit.csv")
+print(fitbit_p)

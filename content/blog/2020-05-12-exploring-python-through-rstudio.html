@@ -12,6 +12,7 @@ description: ''
 
 <p>There is a common debate among the coding world as to which language is better: R or Python. Though these languages are different and one might be preferable over the other in certain situations, there is actually a lot of overlap in the usage of R and Python. First, the python language can actually be ran and interpreted within the R-studio system. In the example below, the code is translated to Python despite bring run in R due to the specification of {python} at the beginning of the chunk:</p>
 <pre class="python"><code>#Py chunk:
+
 five_p=5
 print(five_p)</code></pre>
 <pre><code>## 5</code></pre>
@@ -22,6 +23,7 @@ print(two_p)</code></pre>
 <pre><code>## 25</code></pre>
 <p>The same code from above in the Python chunk can be run below in the R chunk, but this time in the language of R:</p>
 <pre class="r"><code>#R chunk:
+
 five_r &lt;- 5
 five_r</code></pre>
 <pre><code>## [1] 5</code></pre>
@@ -32,10 +34,9 @@ two_r</code></pre>
 <pre><code>## [1] 25</code></pre>
 <p>Though different notations and different languages, both codes where able to be run in R and resulted in the same, correct answer.</p>
 <p>So, both languages can be run in R, but what how do the functions within each language compare? Through slightly different notations, both R and Python can execute a lot of the same functions.</p>
-<ul>
-<li>One resemblance is the “numpty” add-on in Python, which parallels a lot of the arithmetic functions that come installed with R-studio. Numpty contains an abundance of pre-defined functions. Using R, we can execute basic functions such as:</li>
-</ul>
+<p>One resemblance is the “numpty” add-on in Python, which parallels a lot of the arithmetic functions that come installed with R-studio. Numpty contains an abundance of pre-defined functions. Using R, we can execute basic functions such as:</p>
 <pre class="r"><code>#R chunk:
+
 #create a vector of 10 random numbers between 1 and 100 with replacement
 set.seed(345)
 vector &lt;- sample(1:100, 10, replace=TRUE)
@@ -50,21 +51,80 @@ log_r &lt;- log(mean_r)
 log_r</code></pre>
 <pre><code>## [1] 4.245634</code></pre>
 <p>The same functions from R can be executed using numpy in Python:</p>
-<pre class="python"><code>import numpy as np
+<pre class="python"><code>#Py chunk:
+
+import numpy as np
 #create an array of 10 random numbers between 1 and 100 with replacement
 array1=np.random.randint(low=1, high=100, size=10)
-print(array1)
-#to be consistent with the R code, replace the values with the randomly generated values from above by creating a new array</code></pre>
-<pre><code>## [76 41 90 17 90 42 56 75 40 60]</code></pre>
-<pre class="python"><code>array2=np.array([93, 87, 83, 95, 21, 50, 60, 84, 28, 97])
-print(array2)
-#find the mean of the array</code></pre>
+print(array1)</code></pre>
+<pre><code>## [83 74 12  9  7 69 62 10  3 62]</code></pre>
+<pre class="python"><code>#to be consistent with the R code, replace the values with the randomly generated values from above by creating a new array
+array2=np.array([93, 87, 83, 95, 21, 50, 60, 84, 28, 97])
+print(array2)</code></pre>
 <pre><code>## [93 87 83 95 21 50 60 84 28 97]</code></pre>
-<pre class="python"><code>mean_p=np.mean(array2)
-print(mean_p)
-#find the log of the mean</code></pre>
+<pre class="python"><code>#find the mean of the array
+mean_p=np.mean(array2)
+print(mean_p)</code></pre>
 <pre><code>## 69.8</code></pre>
-<pre class="python"><code>log_p=np.log(mean_p)
+<pre class="python"><code>#find the log of the mean
+log_p=np.log(mean_p)
 print(log_p)</code></pre>
 <pre><code>## 4.24563400977</code></pre>
-<p>Even though the codes slightly differ, we still get the same results! Also, notice the difference in rounding between the R answers and the Python answers. In this case, it is evident that R truncates earlier than Python does, thereofre Python is showing more exact answers.</p>
+<p>Even though the codes slightly differ, we still get the same results! Also, notice the difference in rounding between the R answers and the Python answers. In the calculating of the log, it is evident that R truncates earlier than Python does, thereofre Python is showing more exact answers.</p>
+<p>Another similar function of languages is plotting. In R, “ggplot2” can be fairly equivicated to “matplotlib” in Python. Below, we take a look at ggplot2 being put to use:</p>
+<pre class="r"><code>#R chunk:
+
+#create variables
+x_r &lt;- vector
+x_r</code></pre>
+<pre><code>##  [1] 93 87 83 95 21 50 60 84 28 97</code></pre>
+<pre class="r"><code>y_r &lt;- c(5, 10, 15, 20, 25, 30, 35, 40, 45, 50)
+y_r</code></pre>
+<pre><code>##  [1]  5 10 15 20 25 30 35 40 45 50</code></pre>
+<pre class="r"><code>#create a scatterplot of x vs y
+library(ggplot2)
+plot_r &lt;- ggplot() + geom_point(aes(x_r, y_r))
+plot_r</code></pre>
+<p><img src="/blog/2020-05-12-exploring-python-through-rstudio_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+This same plot can be generated using matplotlib in Python:</p>
+<pre class="python"><code>#Py chunk:
+
+#create variables
+x_p=array2
+print(x_p)</code></pre>
+<pre><code>## [93 87 83 95 21 50 60 84 28 97]</code></pre>
+<pre class="python"><code>y_p=np.array([5, 10, 15, 20, 25, 30, 35, 40, 45, 50])
+print(y_p)</code></pre>
+<pre><code>## [ 5 10 15 20 25 30 35 40 45 50]</code></pre>
+<pre class="python"><code>#create a scatterplot of x vs y
+import matplotlib.pyplot as plt
+plt.scatter(x_p, y_p)</code></pre>
+<p><img src="/blog/2020-05-12-exploring-python-through-rstudio_files/figure-html/unnamed-chunk-10-1.png" /><!-- -->
+Both chunks of code end up creating plots that demonsrate the same data!</p>
+<p>One more important overlap is the use of functions that manipulate the data. In R, we know this tool to be “dplyr”, where we can take data and create new variables, select certain columns, filter for certain observations, and much more. In Python, there are similar functions in the “panda” add-on. Below, we see dplyr being put to use with a subset of my “fitbit” dataset:</p>
+<pre class="r"><code>fitbit_r &lt;- read.csv(&quot;October2019_fitbit.csv&quot;)
+head(fitbit_r)</code></pre>
+<pre><code>##         Date Calories.Burned  Steps Distance Floors Minutes.Sedentary
+## 1 2019-10-01           2,142 11,738     5.06     21             1,169
+## 2 2019-10-02           2,157 12,968     5.56     18             1,156
+## 3 2019-10-03           1,915  7,925     3.40      8             1,164
+## 4 2019-10-04           1,852  8,393     3.60      9             1,286
+## 5 2019-10-05           1,633  3,379     1.49      4             1,332
+## 6 2019-10-06           1,698  5,427     2.33      6             1,319
+##   Minutes.Lightly.Active Minutes.Fairly.Active Minutes.Very.Active
+## 1                    230                    23                  18
+## 2                    215                    34                  35
+## 3                    154                    23                  25
+## 4                    111                    28                  15
+## 5                    108                     0                   0
+## 6                     95                    17                   9
+##   Activity.Calories
+## 1               994
+## 2             1,016
+## 3               695
+## 4               609
+## 5               345
+## 6               433</code></pre>
+<p>import pandas as pd
+fitbit_p=pd.read_csv(“October2019_fitbit.csv”)
+print(fitbit_p)</p>

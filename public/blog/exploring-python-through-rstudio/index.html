@@ -73,7 +73,8 @@
 
 
 <p>There is a common debate among the coding world as to which language is better: R or Python. Though these languages are different and one might be preferable over the other in certain situations, there is actually a lot of overlap in the usage of R and Python. First, the python language can actually be ran and interpreted within the R-studio system. In the example below, the code is translated to Python despite bring run in R due to the specification of {python} at the beginning of the chunk:</p>
-<pre class="python"><code>five_p=5
+<pre class="python"><code>#Py chunk:
+five_p=5
 print(five_p)</code></pre>
 <pre><code>## 5</code></pre>
 <pre class="python"><code>two_p=2
@@ -82,7 +83,8 @@ print(two_p)</code></pre>
 <pre class="python"><code>five_p**two_p</code></pre>
 <pre><code>## 25</code></pre>
 <p>The same code from above in the Python chunk can be run below in the R chunk, but this time in the language of R:</p>
-<pre class="r"><code>five_r &lt;- 5
+<pre class="r"><code>#R chunk:
+five_r &lt;- 5
 five_r</code></pre>
 <pre><code>## [1] 5</code></pre>
 <pre class="r"><code>two_r &lt;- 2
@@ -91,6 +93,43 @@ two_r</code></pre>
 <pre class="r"><code>five_r^(two_r)</code></pre>
 <pre><code>## [1] 25</code></pre>
 <p>Though different notations and different languages, both codes where able to be run in R and resulted in the same, correct answer.</p>
+<p>So, both languages can be run in R, but what how do the functions within each language compare? Through slightly different notations, both R and Python can execute a lot of the same functions.</p>
+<ul>
+<li>One resemblance is the “numpty” add-on in Python, which parallels a lot of the arithmetic functions that come installed with R-studio. Numpty contains an abundance of pre-defined functions. Using R, we can execute basic functions such as:</li>
+</ul>
+<pre class="r"><code>#R chunk:
+#create a vector of 10 random numbers between 1 and 100 with replacement
+set.seed(345)
+vector &lt;- sample(1:100, 10, replace=TRUE)
+vector</code></pre>
+<pre><code>##  [1] 93 87 83 95 21 50 60 84 28 97</code></pre>
+<pre class="r"><code>#find the mean of the vector
+mean_r &lt;- mean(vector)
+mean_r</code></pre>
+<pre><code>## [1] 69.8</code></pre>
+<pre class="r"><code>#find the log of the mean
+log_r &lt;- log(mean_r)
+log_r</code></pre>
+<pre><code>## [1] 4.245634</code></pre>
+<p>The same functions from R can be executed using numpy in Python:</p>
+<pre class="python"><code>import numpy as np
+#create an array of 10 random numbers between 1 and 100 with replacement
+array1=np.random.randint(low=1, high=100, size=10)
+print(array1)
+#to be consistent with the R code, replace the values with the randomly generated values from above by creating a new array</code></pre>
+<pre><code>## [76 41 90 17 90 42 56 75 40 60]</code></pre>
+<pre class="python"><code>array2=np.array([93, 87, 83, 95, 21, 50, 60, 84, 28, 97])
+print(array2)
+#find the mean of the array</code></pre>
+<pre><code>## [93 87 83 95 21 50 60 84 28 97]</code></pre>
+<pre class="python"><code>mean_p=np.mean(array2)
+print(mean_p)
+#find the log of the mean</code></pre>
+<pre><code>## 69.8</code></pre>
+<pre class="python"><code>log_p=np.log(mean_p)
+print(log_p)</code></pre>
+<pre><code>## 4.24563400977</code></pre>
+<p>Even though the codes slightly differ, we still get the same results! Also, notice the difference in rounding between the R answers and the Python answers. In this case, it is evident that R truncates earlier than Python does, thereofre Python is showing more exact answers.</p>
 
               <hr>
               <div class="related-posts">

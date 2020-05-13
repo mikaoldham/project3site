@@ -126,4 +126,4 @@ y=r.x
 print(y)
 ```
 Even though "x" was never clearly defined through Python, it was shared to this chunk after being defined in the R chunk. 
-All of these R/Python interactions can be especially helpul in more complex situations where one language might be more beneficial than the other. For someone like me who prefers the R-studio interphase over Jupyter notebook, I can utilize these aspects to jump back and forth between R and Python without ever leaving R-studio. 
+All of these R/Python interactions can be especially helpful in more complex situations where one language might be more beneficial than the other. For someone like me who prefers the R-studio interphase over Jupyter notebook, I can utilize these aspects to jump back and forth between R and Python without ever leaving R-studio. 

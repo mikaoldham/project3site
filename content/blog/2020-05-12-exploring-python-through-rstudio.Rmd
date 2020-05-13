@@ -110,13 +110,18 @@ plt.scatter(x_p, y_p)
 ```
 Both chunks of code end up creating plots that demonsrate the same data!
 
-One more important overlap is the use of functions that manipulate the data. In R, we know this tool to be "dplyr", where we can take data and create new variables, select certain columns, filter for certain observations, and much more. In Python, there are similar functions in the "panda" add-on. Below, we see dplyr being put to use with a subset of my "fitbit" dataset:
+The aspect of the Python/R overlap that I find the most interesting is "reticulate". Through this package, you are able to share variables between R and Python when using both languages in the same R-markdown. This makes it very simple to bounce back and forth between the different codes. For example, if I wanted to create a variable in R:
 ```{R}
-fitbit_r <- read.csv("October2019_fitbit.csv")
-head(fitbit_r)
+#R chunk:
+library(reticulate)
+x <- c(3, 6, 9, 12, 15 ,18, 21, 24, 27, 30)
+x
 ```
-
-
-import pandas as pd
-fitbit_p=pd.read_csv("October2019_fitbit.csv")
-print(fitbit_p)
+I can then call onto that variable in the python chunk:
+```{python}
+#Py chunk:
+y=r.x
+print(y)
+```
+Even though "x" was never clearly defined through Python, it was shared to this chunk after being defined in the R chunk. 
+All of these R/Python interactions can be especially helpul in more complex situations where one language might be more beneficial than the other. For someone like me who prefers the R-studio interphase over Jupyter notebook, I can utilize these aspects to jump back and forth between R and Python without ever leaving R-studio. 

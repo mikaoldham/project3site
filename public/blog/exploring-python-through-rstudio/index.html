@@ -119,7 +119,7 @@ import numpy as np
 #create an array of 10 random numbers between 1 and 100 with replacement
 array1=np.random.randint(low=1, high=100, size=10)
 print(array1)</code></pre>
-<pre><code>## [83 74 12  9  7 69 62 10  3 62]</code></pre>
+<pre><code>## [11  9 82 90 81 77 84 81 73 95]</code></pre>
 <pre class="python"><code>#to be consistent with the R code, replace the values with the randomly generated values from above by creating a new array
 array2=np.array([93, 87, 83, 95, 21, 50, 60, 84, 28, 97])
 print(array2)</code></pre>
@@ -163,33 +163,19 @@ import matplotlib.pyplot as plt
 plt.scatter(x_p, y_p)</code></pre>
 <p><img src="/blog/2020-05-12-exploring-python-through-rstudio_files/figure-html/unnamed-chunk-10-1.png" /><!-- -->
 Both chunks of code end up creating plots that demonsrate the same data!</p>
-<p>One more important overlap is the use of functions that manipulate the data. In R, we know this tool to be “dplyr”, where we can take data and create new variables, select certain columns, filter for certain observations, and much more. In Python, there are similar functions in the “panda” add-on. Below, we see dplyr being put to use with a subset of my “fitbit” dataset:</p>
-<pre class="r"><code>fitbit_r &lt;- read.csv(&quot;October2019_fitbit.csv&quot;)
-head(fitbit_r)</code></pre>
-<pre><code>##         Date Calories.Burned  Steps Distance Floors Minutes.Sedentary
-## 1 2019-10-01           2,142 11,738     5.06     21             1,169
-## 2 2019-10-02           2,157 12,968     5.56     18             1,156
-## 3 2019-10-03           1,915  7,925     3.40      8             1,164
-## 4 2019-10-04           1,852  8,393     3.60      9             1,286
-## 5 2019-10-05           1,633  3,379     1.49      4             1,332
-## 6 2019-10-06           1,698  5,427     2.33      6             1,319
-##   Minutes.Lightly.Active Minutes.Fairly.Active Minutes.Very.Active
-## 1                    230                    23                  18
-## 2                    215                    34                  35
-## 3                    154                    23                  25
-## 4                    111                    28                  15
-## 5                    108                     0                   0
-## 6                     95                    17                   9
-##   Activity.Calories
-## 1               994
-## 2             1,016
-## 3               695
-## 4               609
-## 5               345
-## 6               433</code></pre>
-<p>import pandas as pd
-fitbit_p=pd.read_csv(“October2019_fitbit.csv”)
-print(fitbit_p)</p>
+<p>The aspect of the Python/R overlap that I find the most interesting is “reticulate”. Through this package, you are able to share variables between R and Python when using both languages in the same R-markdown. This makes it very simple to bounce back and forth between the different codes. For example, if I wanted to create a variable in R:</p>
+<pre class="r"><code>#R chunk:
+library(reticulate)
+x &lt;- c(3, 6, 9, 12, 15 ,18, 21, 24, 27, 30)
+x</code></pre>
+<pre><code>##  [1]  3  6  9 12 15 18 21 24 27 30</code></pre>
+<p>I can then call onto that variable in the python chunk:</p>
+<pre class="python"><code>#Py chunk:
+y=r.x
+print(y)</code></pre>
+<pre><code>## [3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0, 24.0, 27.0, 30.0]</code></pre>
+<p>Even though “x” was never clearly defined through Python, it was shared to this chunk after being defined in the R chunk.
+All of these R/Python interactions can be especially helpul in more complex situations where one language might be more beneficial than the other. For someone like me who prefers the R-studio interphase over Jupyter notebook, I can utilize these aspects to jump back and forth between R and Python without ever leaving R-studio.</p>
 
               <hr>
               <div class="related-posts">

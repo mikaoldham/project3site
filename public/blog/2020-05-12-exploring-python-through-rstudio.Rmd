@@ -21,7 +21,7 @@ print(two_p)
 five_p**two_p
 ```
 
-The same code from above in the Python chunk can be run below in the R chunk, but this time in the language of R:
+The same operations from above in the Python chunk can be run below in the R chunk, but this time in the language of R:
 ```{R}
 #R chunk:
 
@@ -33,7 +33,7 @@ five_r^(two_r)
 ```
 Though different notations and different languages, both codes where able to be run in R and resulted in the same, correct answer.
 
-So, both languages can be run in R, but what how do the functions within each language compare? Through slightly different notations, both R and Python can execute a lot of the same functions.
+So, both languages can be run in R, but how do the functions within each language compare? Through slightly different notations, both R and Python can execute a lot of the same functions.
 
 One resemblance is the "numpty" add-on in Python, which parallels a lot of the  arithmetic functions that come installed with R-studio. Numpty contains an abundance of pre-defined functions. Using R, we can execute basic functions such as:
 ```{R}
@@ -63,7 +63,7 @@ array1=np.random.randint(low=1, high=100, size=10)
 print(array1)
 ```
 ```{python}
-#to be consistent with the R code, replace the values with the randomly generated values from above by creating a new array
+#to be consistent with the R code, replace the values with the randomly generated values    from above by creating a new array
 array2=np.array([93, 87, 83, 95, 21, 50, 60, 84, 28, 97])
 print(array2)
 ```
@@ -79,7 +79,7 @@ print(log_p)
 ```
 Even though the codes slightly differ, we still get the same results! Also, notice the difference in rounding between the R answers and the Python answers. In the calculating of the log, it is evident that R truncates earlier than Python does, thereofre Python is showing more exact answers. 
 
-Another similar function of languages is plotting. In R, "ggplot2" can be fairly equivicated to "matplotlib" in Python. Below, we take a look at ggplot2 being put to use:
+Another similar function between the languages is plotting. In R, "ggplot2" can be fairly equivicated to "matplotlib" in Python. Below, we take a look at ggplot2 being put to use:
 ```{R}
 #R chunk:
 

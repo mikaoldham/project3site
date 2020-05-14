@@ -10,11 +10,11 @@ title: Projects
 
 ## Projects
 
-Below are some of the projects I have recently competed:
+Below are some of the projects I have recently completed:
 
-- [Exploratory Analysis of Netflix and Fitbit Data using Tidyverse Tools](/project1final/)
+- [Exploratory Analysis of Netflix and Fitbit Data Using Tidyverse Tools](/project1final/)
 
-- [Modeling, testing, and Classifying Aura Headache Data](/project2final/)
+- [Modeling, Testing, and Classifying Aura Headache Data](/project2final/)
 
 
 
